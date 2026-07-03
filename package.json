@@ -1,9 +1,9 @@
 {
-  "name": "warranty-spike",
+  "name": "warranty-croo",
   "version": "0.0.1",
   "type": "module",
   "license": "MIT",
-  "description": "Local CROO CAP spike for Warranty, a bonded refund layer for failed agent jobs.",
+  "description": "Warranty is a money-back guarantee for CROO agent work, backed by a bonded Base USDC refund reserve.",
   "scripts": {
     "check": "node --check src/*.mjs",
     "public:check": "node scripts/check-public-surface.mjs",
