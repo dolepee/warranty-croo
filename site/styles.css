@@ -92,6 +92,15 @@ a:hover {
   padding: clamp(42px, 7vw, 96px) clamp(18px, 4vw, 58px) 42px;
 }
 
+.hero > *,
+.proof-panel,
+.section-header,
+.flow,
+.proofs,
+.wallets {
+  min-width: 0;
+}
+
 .eyebrow {
   align-items: center;
   color: var(--green-ink);
@@ -118,6 +127,7 @@ h1 {
   line-height: 0.94;
   margin: 22px 0;
   max-width: 880px;
+  overflow-wrap: break-word;
 }
 
 .lead {
@@ -333,10 +343,45 @@ h1 {
 
   .nav {
     justify-content: flex-start;
+    width: 100%;
   }
 }
 
 @media (max-width: 520px) {
+  .topbar {
+    gap: 16px;
+  }
+
+  .hero > *,
+  .nav,
+  .proof-panel {
+    max-width: 350px;
+  }
+
+  .nav a,
+  .button {
+    font-size: 13px;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 12px;
+  }
+
+  .nav {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: clamp(30px, 10vw, 36px);
+    line-height: 1;
+    max-width: 350px;
+  }
+
+  .lead {
+    font-size: 16px;
+    max-width: 350px;
+  }
+
   .metric-grid {
     grid-template-columns: 1fr;
   }
