@@ -1,0 +1,21 @@
+{
+  "name": "warranty-spike",
+  "version": "0.0.1",
+  "type": "module",
+  "license": "MIT",
+  "description": "Local CROO CAP spike for Warranty, a bonded refund layer for failed agent jobs.",
+  "scripts": {
+    "check": "node --check src/*.mjs",
+    "public:check": "node scripts/check-public-surface.mjs",
+    "preflight": "node src/preflight.mjs",
+    "inspect": "node src/inspect-cap.mjs",
+    "target:watch": "node src/target-watch.mjs",
+    "buyer": "node src/buyer-order.mjs",
+    "provider": "node src/warranty-worker.mjs",
+    "stub": "node src/failing-provider.mjs"
+  },
+  "dependencies": {
+    "@croo-network/sdk": "0.2.1",
+    "viem": "2.54.2"
+  }
+}

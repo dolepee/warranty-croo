@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Warranty for CROO Agent Work</title>
+    <meta
+      name="description"
+      content="Warranty is a CROO agent that forwards paid jobs to target agents and refunds buyers from a bonded Base USDC reserve when delivery misses the timeout."
+    />
+    <meta property="og:title" content="Warranty for CROO Agent Work" />
+    <meta
+      property="og:description"
+      content="Paid CROO order, paid target order, timeout, delivery receipt, and real Base USDC refund."
+    />
+    <meta property="og:image" content="./og.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="./og.svg" />
+    <link rel="icon" href="./warranty-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="topbar">
+        <a class="brand" href="./index.html" aria-label="Warranty home">
+          <img src="./warranty-mark.svg" alt="" />
+          <span>Warranty</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#flow">Flow</a>
+          <a href="#proof">Proof</a>
+          <a href="./proofs.json">Proof JSON</a>
+          <a class="button primary" href="https://agent.croo.network" rel="noreferrer">CROO Store</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow"><span class="dot"></span> CROO CAP spike passed</div>
+          <h1>Agent work with a real refund reserve.</h1>
+          <p class="lead">
+            Warranty receives a paid CROO order, hires a target agent through CAP, and pays that
+            target. If delivery misses the buyer's timeout, Warranty sends an on-chain Base USDC
+            refund from its bonded reserve.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#proof">View proof</a>
+            <a class="button" href="./proofs.json">Proof JSON</a>
+            <a class="button" href="#flow">How it works</a>
+          </div>
+        </div>
+
+        <aside class="proof-panel" aria-label="Status summary">
+          <h2>Live proof summary</h2>
+          <span class="status"><span class="dot"></span> both paths completed</span>
+          <div class="metric-grid">
+            <div class="metric">
+              <strong>2</strong>
+              <span>paid CROO flows</span>
+            </div>
+            <div class="metric">
+              <strong>0.08</strong>
+              <span>USDC refunded on Base</span>
+            </div>
+            <div class="metric">
+              <strong>1</strong>
+              <span>reserve wallet</span>
+            </div>
+            <div class="metric">
+              <strong>8453</strong>
+              <span>Base chain ID</span>
+            </div>
+          </div>
+          <p>
+            This is still a spike, not the final product. The core primitive is proven: paid order,
+            paid sub-order, timeout branch, and reserve refund.
+          </p>
+        </aside>
+      </section>
+
+      <section class="section" id="flow">
+        <div class="section-header">
+          <h2>What Warranty does</h2>
+          <p>
+            The value is not another score or opinion. Warranty puts a reserve behind agent work and
+            returns money when a paid job misses the timeout.
+          </p>
+        </div>
+        <div class="flow">
+          <article class="step">
+            <div class="step-number">01</div>
+            <h3>Buyer pays Warranty</h3>
+            <p>A buyer creates a CROO order for guaranteed delivery and pays the Warranty agent.</p>
+          </article>
+          <article class="step">
+            <div class="step-number">02</div>
+            <h3>Warranty hires target</h3>
+            <p>Warranty places and pays a second CAP order to the requested target service.</p>
+          </article>
+          <article class="step">
+            <div class="step-number">03</div>
+            <h3>Delivery is checked</h3>
+            <p>The worker polls CROO order state and delivery content against the buyer timeout.</p>
+          </article>
+          <article class="step">
+            <div class="step-number">04</div>
+            <h3>Refund if missed</h3>
+            <p>If delivery is not available before timeout, Warranty refunds the buyer from reserve.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="proof">
+        <div class="section-header">
+          <h2>Live proofs</h2>
+          <p>
+            These are not mock receipts. The happy path and refund path both used real CROO orders.
+            The refund path also includes a Base USDC transfer from the reserve wallet.
+          </p>
+        </div>
+        <div class="proofs">
+          <article class="proof-card">
+            <span class="status"><span class="dot"></span> fulfilled</span>
+            <h3>Happy path</h3>
+            <p>Buyer paid Warranty, Warranty paid the target service, the target delivered, and Warranty delivered back.</p>
+            <div class="proof-table">
+              <div class="proof-row">
+                <span>incoming order</span>
+                <code class="hash">50ee14dd-c361-409a-b1b5-751eec0e1de2</code>
+              </div>
+              <div class="proof-row">
+                <span>buyer paid</span>
+                <a class="hash" href="https://basescan.org/tx/0x00048bc8127fb4f4886c6b448379bd94cf27006ebe725a37860cc1c5d4d71964" rel="noreferrer">0x00048b...d71964</a>
+              </div>
+              <div class="proof-row">
+                <span>target order</span>
+                <code class="hash">4b2f40f0-817e-4004-ace8-882740b4dad2</code>
+              </div>
+              <div class="proof-row">
+                <span>target paid</span>
+                <a class="hash" href="https://basescan.org/tx/0x7e007fe5f4537e3445be3966c4a60ff4497924d0e5a42aefd3f85a92015e51ab" rel="noreferrer">0x7e007f...5e51ab</a>
+              </div>
+              <div class="proof-row">
+                <span>delivery</span>
+                <a class="hash" href="https://basescan.org/tx/0x6ec886a9bc2722c9b913b8aaac0baf561c0cdf0b7a8a8faaacb9e9bf9f105bdc" rel="noreferrer">0x6ec886...f105bdc</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="proof-card">
+            <span class="status"><span class="dot"></span> refunded</span>
+            <h3>Timeout path</h3>
+            <p>Warranty paid a target service, delivery was unavailable before timeout, then Warranty refunded the buyer from reserve.</p>
+            <div class="proof-table">
+              <div class="proof-row">
+                <span>incoming order</span>
+                <code class="hash">60c53263-c2af-4e30-ad54-28dad0f64635</code>
+              </div>
+              <div class="proof-row">
+                <span>buyer paid</span>
+                <a class="hash" href="https://basescan.org/tx/0x42c32450fd42d581f81f04acfb2048277bd33c13e85abd1a8cef97a480e145e1" rel="noreferrer">0x42c324...e145e1</a>
+              </div>
+              <div class="proof-row">
+                <span>target paid</span>
+                <a class="hash" href="https://basescan.org/tx/0xb07b4c5d0c5486e946e0fc6aafcb966a9fc51fe0c5eae5881bd15e6719378c2a" rel="noreferrer">0xb07b4c...78c2a</a>
+              </div>
+              <div class="proof-row">
+                <span>receipt</span>
+                <a class="hash" href="https://basescan.org/tx/0x08114c76624eb3db66f71e1e5e995a000a13a8a0107f170ecdd191892a762d72" rel="noreferrer">0x08114c...762d72</a>
+              </div>
+              <div class="proof-row">
+                <span>refund</span>
+                <a class="hash" href="https://basescan.org/tx/0x4ddfe99dec8b0c96f6bd0cb752ebf378afa4551185b84403ef3e1e1d83ada744" rel="noreferrer">0x4ddfe9...da744</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Public wallets</h2>
+          <p>The reserve is separate from the CROO agent wallets so the refund guarantee is visible on chain.</p>
+        </div>
+        <div class="wallets">
+          <div class="wallet">
+            <small>Warranty agent</small>
+            <code class="hash">0x29b4EE3D78d641e3936e52F400227b3e8e4a8ABE</code>
+          </div>
+          <div class="wallet">
+            <small>Buyer agent</small>
+            <code class="hash">0x5F3d43A2703740871F4345Bb2e4181103979aa1C</code>
+          </div>
+          <div class="wallet">
+            <small>Refund reserve</small>
+            <code class="hash">0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9</code>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Warranty for CROO agent work</span>
+        <span>Built on CROO CAP and Base USDC</span>
+      </footer>
+    </main>
+  </body>
+</html>
