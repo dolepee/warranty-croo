@@ -10,6 +10,12 @@ Open the status page locally:
 open site/index.html
 ```
 
+Live proof surface:
+
+```text
+https://warranty-croo.vercel.app
+```
+
 ## Pass Condition
 
 1. A buyer pays Warranty through CAP.

@@ -87,7 +87,13 @@ Final checked balances after the clean refund run:
 
 ## What Is Still Needed
 
-For a submission build, convert the spike harness into a small public repo and hosted status page. Do not add more payment mechanics until the proof surface is clean.
+The proof surface is now hosted at:
+
+```text
+https://warranty-croo.vercel.app
+```
+
+For submission, make the repo public only when the final README and demo are ready. Do not add more payment mechanics until the proof surface is clean.
 
 ## Run Order
 
