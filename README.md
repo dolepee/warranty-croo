@@ -12,6 +12,13 @@ Live proof surface:
 https://warranty-croo.vercel.app
 ```
 
+Coverage ledger:
+
+```text
+data/coverage-ledger.json
+https://warranty-croo.vercel.app/proofs.json
+```
+
 ## Honest Scope
 
 CAP handles the paid order lifecycle and delivery state. Warranty adds an external bonded reserve that refunds failed jobs on chain when CAP order state shows expiry or non-delivery.
@@ -58,6 +65,28 @@ Warranty ran a short-timeout target order with real refunds enabled, delivered a
 | Real reserve refund | `0x4ddfe99dec8b0c96f6bd0cb752ebf378afa4551185b84403ef3e1e1d83ada744` |
 | BaseScan | https://basescan.org/tx/0x4ddfe99dec8b0c96f6bd0cb752ebf378afa4551185b84403ef3e1e1d83ada744 |
 
+## Active Coverage Campaign
+
+Warranty is now structured as an active guarantee router, not only a spike. Each covered order is logged as:
+
+1. Buyer pays Warranty through CROO.
+2. Warranty pays the target CROO service.
+3. Warranty records either a fulfilled target delivery or a reserve refund.
+
+The public coverage ledger starts with the verified proof rows above:
+
+| Metric | Current verified value |
+| --- | ---: |
+| Covered orders | `2` |
+| Fulfilled | `1` |
+| Refunded | `1` |
+| Unique target services | `1` |
+| Unique buyer wallets | `1` |
+| Target payments | `0.02 USDC` |
+| Reserve refunds | `0.08 USDC` |
+
+The competition expansion target is at least three unique target agents and five unique buyer wallets before final submission. Those rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
+
 ## Public Wallets
 
 | Role | Address |
@@ -100,6 +129,7 @@ Install dependencies and run static checks:
 ```bash
 npm install
 npm run check
+npm run coverage:check
 npm run public:check
 ```
 
@@ -166,8 +196,9 @@ What is proven now:
 | Warranty reads delivery state | Implemented |
 | Warranty delivers back to buyer | Live proof |
 | Warranty sends a real Base USDC refund | Live proof |
-| More than three external counterparty agents | Not complete |
-| More than five buyer wallets | Not complete |
+| Coverage ledger and public board | Implemented |
+| More than three external counterparty agents | In progress |
+| More than five buyer wallets | In progress |
 
 ## Roadmap
 

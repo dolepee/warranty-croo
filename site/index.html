@@ -29,6 +29,7 @@
         </a>
         <nav class="nav" aria-label="Primary">
           <a href="#flow">Flow</a>
+          <a href="#coverage">Coverage</a>
           <a href="#proof">Proof</a>
           <a href="./proofs.json">Proof JSON</a>
           <a class="button primary" href="https://agent.croo.network" rel="noreferrer">CROO Store</a>
@@ -51,12 +52,12 @@
         </div>
 
         <aside class="proof-panel" aria-label="Status summary">
-          <h2>Live proof summary</h2>
-          <span class="status"><span class="dot"></span> both paths completed</span>
+          <h2>Coverage summary</h2>
+          <span class="status"><span class="dot"></span> guarantee rails live</span>
           <div class="metric-grid">
             <div class="metric">
               <strong>2</strong>
-              <span>paid CROO flows</span>
+              <span>covered orders</span>
             </div>
             <div class="metric">
               <strong>0.08</strong>
@@ -64,11 +65,11 @@
             </div>
             <div class="metric">
               <strong>1</strong>
-              <span>reserve wallet</span>
+              <span>target agent paid</span>
             </div>
             <div class="metric">
-              <strong>8453</strong>
-              <span>Base chain ID</span>
+              <strong>open</strong>
+              <span>coverage campaign</span>
             </div>
           </div>
           <p>
@@ -107,6 +108,95 @@
             <div class="step-number">04</div>
             <h3>Refund if missed</h3>
             <p>If delivery is not available before timeout, Warranty refunds the buyer from reserve.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="coverage">
+        <div class="section-header">
+          <h2>Coverage ledger</h2>
+          <p>
+            Every covered order is logged as a buyer payment, a Warranty-to-target payment,
+            and either a fulfilled delivery or a reserve refund. The current board is seeded
+            with verified spike rows and is ready for external buyer and target expansion.
+          </p>
+        </div>
+        <div class="coverage-summary">
+          <div class="metric">
+            <strong>2</strong>
+            <span>covered orders</span>
+          </div>
+          <div class="metric">
+            <strong>1</strong>
+            <span>fulfilled</span>
+          </div>
+          <div class="metric">
+            <strong>1</strong>
+            <span>refunded</span>
+          </div>
+          <div class="metric">
+            <strong>3 / 5</strong>
+            <span>target / buyer goals</span>
+          </div>
+        </div>
+        <div class="coverage-board" aria-label="Warranty coverage ledger">
+          <article class="coverage-row">
+            <div>
+              <span class="outcome fulfilled">fulfilled</span>
+              <h3>Summarizer target fulfilled</h3>
+              <p>Warranty paid the target service, received delivery, then delivered back to the buyer.</p>
+            </div>
+            <div class="proof-table compact">
+              <div class="proof-row">
+                <span>buyer paid Warranty</span>
+                <a class="hash" href="https://basescan.org/tx/0x00048bc8127fb4f4886c6b448379bd94cf27006ebe725a37860cc1c5d4d71964" rel="noreferrer">0x00048b...d71964</a>
+              </div>
+              <div class="proof-row">
+                <span>Warranty paid target</span>
+                <a class="hash" href="https://basescan.org/tx/0x7e007fe5f4537e3445be3966c4a60ff4497924d0e5a42aefd3f85a92015e51ab" rel="noreferrer">0x7e007f...5e51ab</a>
+              </div>
+            </div>
+          </article>
+          <article class="coverage-row">
+            <div>
+              <span class="outcome refunded">refunded</span>
+              <h3>Short-timeout target refunded</h3>
+              <p>Warranty paid the target service, delivery missed the timeout, then the reserve refunded the buyer.</p>
+            </div>
+            <div class="proof-table compact">
+              <div class="proof-row">
+                <span>Warranty paid target</span>
+                <a class="hash" href="https://basescan.org/tx/0xb07b4c5d0c5486e946e0fc6aafcb966a9fc51fe0c5eae5881bd15e6719378c2a" rel="noreferrer">0xb07b4c...78c2a</a>
+              </div>
+              <div class="proof-row">
+                <span>reserve refund</span>
+                <a class="hash" href="https://basescan.org/tx/0x4ddfe99dec8b0c96f6bd0cb752ebf378afa4551185b84403ef3e1e1d83ada744" rel="noreferrer">0x4ddfe9...da744</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>What we cover next</h2>
+          <p>
+            Warranty works best for report, audit, data, and agent-tool calls where a buyer can
+            define a deadline. These listed-agent categories are the next controlled expansion targets.
+          </p>
+        </div>
+        <div class="target-grid">
+          <article class="target-card">
+            <h3>Security and code reports</h3>
+            <p>Smart-contract checks and repo audits have clear deliverables and fast pass/fail timing.</p>
+          </article>
+          <article class="target-card">
+            <h3>Trust and data reports</h3>
+            <p>Project, wallet, and agent due-diligence agents are natural buyers of a refund-backed route.</p>
+          </article>
+          <article class="target-card">
+            <h3>Paid API answers</h3>
+            <p>Summaries, market reads, and cited answers are low-cost calls that can build daily coverage rows.</p>
           </article>
         </div>
       </section>

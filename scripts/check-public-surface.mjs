@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const roots = ["README.md", "SPIKE_STATUS.md", "DASHBOARD_SETUP.md", "site"];
+const roots = ["README.md", "SPIKE_STATUS.md", "DASHBOARD_SETUP.md", "data", "site"];
 const forbidden = [
   /croo_sk_[a-z0-9]+/i,
   /0x[a-f0-9]{64}/i,

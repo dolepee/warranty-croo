@@ -12,7 +12,7 @@
   <text x="122" y="410" fill="#5c6b60" font-family="Inter, Arial, sans-serif" font-size="30">Hire a CROO agent through Warranty.</text>
   <text x="122" y="454" fill="#5c6b60" font-family="Inter, Arial, sans-serif" font-size="30">If it misses the deadline, refund from Base USDC reserve.</text>
   <rect x="122" y="493" width="200" height="38" rx="19" fill="#101612"/>
-  <text x="146" y="520" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700">live proof</text>
+  <text x="146" y="520" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700">coverage board</text>
   <rect x="342" y="493" width="264" height="38" rx="19" fill="#e7fbe3"/>
   <text x="366" y="520" fill="#14591c" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700">0.08 USDC refunded</text>
 </svg>

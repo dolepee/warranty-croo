@@ -211,6 +211,81 @@ h1 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.coverage-summary {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 16px;
+}
+
+.coverage-board {
+  display: grid;
+  gap: 14px;
+}
+
+.coverage-row {
+  align-items: start;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+  padding: 20px;
+}
+
+.coverage-row h3,
+.target-card h3 {
+  font-size: 22px;
+  letter-spacing: 0;
+  line-height: 1.1;
+  margin: 12px 0 8px;
+}
+
+.coverage-row p,
+.target-card p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.outcome {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+
+.outcome.fulfilled {
+  background: #e7fbe3;
+  color: var(--green-ink);
+}
+
+.outcome.refunded {
+  background: #eef2ff;
+  color: #2443a8;
+}
+
+.proof-table.compact {
+  margin-top: 0;
+}
+
+.target-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.target-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  min-height: 160px;
+  padding: 18px;
+}
+
 .step {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -331,6 +406,9 @@ h1 {
   .hero,
   .proofs,
   .flow,
+  .coverage-summary,
+  .coverage-row,
+  .target-grid,
   .wallets {
     grid-template-columns: 1fr;
   }
