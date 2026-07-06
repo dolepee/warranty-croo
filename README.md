@@ -4,7 +4,7 @@ Warranty is the money-back guarantee for CROO agent work. Hire any CROO agent th
 
 CROO gives agents identity, payments, discovery, and liquidity. Agent commerce also needs assurance. Buyers need a way to pay agents without accepting unlimited delivery risk, and agents need a reusable path for buying work from other agents without writing custom failure handling every time.
 
-Warranty receives a paid CROO order, hires the requested target agent through CAP, pays that target agent, watches the delivery state, and either returns the target result or refunds the buyer from reserve.
+Warranty receives a paid CROO order, hires the requested target agent through CAP, pays that target agent, watches the delivery state, and either returns the target result, refunds the buyer from reserve, or uses CROO's native reject path when a target refuses or fails before delivery.
 
 Live proof surface:
 
@@ -21,7 +21,7 @@ https://warranty-croo.vercel.app/proofs.json
 
 ## Honest Scope
 
-CAP handles the paid order lifecycle and delivery state. Warranty adds an external bonded reserve that refunds failed jobs on chain when CAP order state shows expiry or non-delivery.
+CAP handles the paid order lifecycle and delivery state. Warranty adds an external bonded reserve that refunds failed jobs on chain when CAP order state shows expiry or non-delivery. It also records CROO-native rejection refunds when the platform itself returns escrowed funds after a target rejects.
 
 Warranty is not protocol-native escrow and it is not an insurance product. The refund reserve is an ordinary Base USDC wallet controlled by Warranty for the current proof. The product claim is narrower: a paid intermediary agent can add a visible money-back guarantee to CROO agent work without changing CAP.
 
@@ -32,11 +32,11 @@ Warranty is not protocol-native escrow and it is not an insurance product. The r
 3. Warranty places and pays a second CAP order to the target agent.
 4. Warranty monitors delivery state through CAP order and delivery reads.
 5. If the target delivers before timeout, Warranty forwards the result to the buyer.
-6. If delivery is missing after timeout, Warranty delivers a refund receipt and sends Base USDC from its bonded reserve to the buyer.
+6. If delivery is missing after timeout, Warranty delivers a refund receipt and sends Base USDC from its bonded reserve to the buyer, or rejects through CROO when the platform can return the escrowed payment natively.
 
 ## Live Proof
 
-The current proof covers both branches: fulfilled delivery and missed-deadline refund.
+The current proof covers fulfilled delivery, reserve refund, and CROO-native reject refund.
 
 ### Fulfilled Delivery
 
@@ -65,27 +65,54 @@ Warranty ran a short-timeout target order with real refunds enabled, delivered a
 | Real reserve refund | `0x4ddfe99dec8b0c96f6bd0cb752ebf378afa4551185b84403ef3e1e1d83ada744` |
 | BaseScan | https://basescan.org/tx/0x4ddfe99dec8b0c96f6bd0cb752ebf378afa4551185b84403ef3e1e1d83ada744 |
 
+### Native Reject Refund
+
+A requested target refused new orders. Warranty tried a supervised fallback target, the fallback rejected after payment, CROO refunded Warranty on the target leg, then Warranty rejected the incoming order and CROO refunded the buyer.
+
+| Step | Evidence |
+| --- | --- |
+| Incoming Warranty order | `696f7c53-eb65-4164-bdac-ffbc3677bfaf` |
+| Buyer paid Warranty | `0x08f765b783aec7216403c69ff098248d889490e05e2f60ad29173cd6b7adf2aa` |
+| Target order | `d3940db4-f0ae-4ba3-9fbc-ed12eb33fbd3` |
+| Warranty paid target | `0x7bbf7dbc278753bb0db660a5f0ad7bfbc0e866555c55ccc02aa4ca6ed7941a4d` |
+| Target reject refund | `0x05c391be1c6579bc552ddef3f08dde3d0c5bed2edf45f46bf646be1f23a7dcc0` |
+| Buyer native refund | `0xd4f287a7d358505b33d26a2c9c2e4df072e3bc94f0a387e43ca13d0d04c64f85` |
+
+### Live ZERU Fulfillment
+
+Warranty covered a live ZERU research report, paid the target service, verified target delivery, and delivered the report back to the buyer.
+
+| Step | Evidence |
+| --- | --- |
+| Incoming Warranty order | `3d0dd11b-1667-4f8c-b5da-14a20b3dd9c0` |
+| Buyer paid Warranty | `0xaf79d1d797a9981d40e1fc7e105c2f04053852cf05c66780ab95c45e8707014e` |
+| Target order | `1166a0ad-cd5f-4307-ad1a-12034f627c88` |
+| Warranty paid ZERU | `0x200231a48b0acf3dbf0651c81436ff8465d72fc0cd6c83c6c098292024ca4c70` |
+| ZERU delivery | `0xd9fd1ad7092d6c7e967de64214c42aa98cfee2472d9f5a85ed82e3ab78019c15` |
+| Warranty delivery | `0x06625913d42157753ba4a0c9411ee93ed217e1dc6ac9cdcb70a51a0b7b176fdf` |
+
 ## Active Coverage Campaign
 
 Warranty is now structured as an active guarantee router, not only a spike. Each covered order is logged as:
 
 1. Buyer pays Warranty through CROO.
 2. Warranty pays the target CROO service.
-3. Warranty records either a fulfilled target delivery or a reserve refund.
+3. Warranty records either a fulfilled target delivery, a reserve refund, or a CROO-native reject refund.
 
 The public coverage ledger starts with the verified proof rows above:
 
 | Metric | Current verified value |
 | --- | ---: |
-| Covered orders | `2` |
-| Fulfilled | `1` |
-| Refunded | `1` |
-| Unique target services | `1` |
+| Covered orders | `4` |
+| Fulfilled | `2` |
+| Refunded | `2` |
+| Unique target services | `3` |
 | Unique buyer wallets | `1` |
-| Target payments | `0.02 USDC` |
+| Target payments | `0.12 USDC` |
 | Reserve refunds | `0.08 USDC` |
+| Native buyer refunds | `0.08 USDC` |
 
-The competition expansion target is at least three unique target agents and five unique buyer wallets before final submission. Those rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
+The competition expansion target is now five unique buyer wallets before final submission. New rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
 
 ## Public Wallets
 
@@ -95,13 +122,7 @@ The competition expansion target is at least three unique target agents and five
 | Buyer agent | `0x5F3d43A2703740871F4345Bb2e4181103979aa1C` |
 | Refund reserve | `0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9` |
 
-Last checked after the clean refund run:
-
-| Wallet | USDC balance |
-| --- | --- |
-| Reserve | `0.006786` |
-| Buyer | `0.196684` |
-| Warranty | `0.303004` |
+Use `npm run preflight` for the current reserve mode and balance before any real refund run.
 
 ## CROO SDK Methods Used
 
@@ -116,6 +137,7 @@ The worker uses the CROO SDK for the full paid-order lifecycle:
 | Read order state | `client.getOrder()` |
 | Read delivery | `client.getDelivery()` |
 | Deliver result or refund receipt | `client.deliverOrder()` |
+| Reject an order through CROO native lifecycle | `client.rejectOrder()` |
 | Inspect order history | `client.listOrders()` |
 | Negotiation events | `EventType.NegotiationCreated` |
 | Payment events | `EventType.OrderPaid` |
@@ -197,15 +219,15 @@ What is proven now:
 | Warranty delivers back to buyer | Live proof |
 | Warranty sends a real Base USDC refund | Live proof |
 | Coverage ledger and public board | Implemented |
-| More than three external counterparty agents | In progress |
+| At least three target services covered | Live proof |
 | More than five buyer wallets | In progress |
 
 ## Roadmap
 
 Near-term work before final submission:
 
-1. Coverage ledger: track distinct buyer wallets and target agents from day one.
+1. Buyer expansion: add more real buyer wallets to the coverage ledger.
 2. Backed by Warranty badge: let target agents show they can be hired through a refund-backed path.
 3. Live coverage board: show fulfilled, refunded, pending, and reserve balance in one public view.
-4. More target agents: run the same flow across at least three real CROO services.
+4. More target agents: continue running the same flow across real CROO services.
 5. Marketplace expansion: Warranty is marketplace-agnostic; OKX.AI listing is the next venue after the CROO proof.
