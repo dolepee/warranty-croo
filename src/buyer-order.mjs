@@ -9,13 +9,16 @@ if (!warrantyServiceId) throw new Error("set WARRANTY_SERVICE_ID to the Warranty
 const targetServiceId = optionalEnv("WARRANTY_TARGET_SERVICE_ID");
 if (!targetServiceId) throw new Error("set WARRANTY_TARGET_SERVICE_ID to the target service Warranty should hire");
 
+const exactTargetRequirements = optionalEnv("WARRANTY_TARGET_REQUIREMENTS");
 const requirements = {
   targetServiceId,
   timeoutMs: Number(optionalEnv("WARRANTY_TARGET_TIMEOUT_SECONDS", "180")) * 1000,
-  targetRequirements: {
-    task: optionalEnv("WARRANTY_TASK", "Return a short result for the Warranty CAP spike."),
-    requestedAt: new Date().toISOString(),
-  },
+  targetRequirements: exactTargetRequirements
+    ? parseTargetRequirements(exactTargetRequirements)
+    : {
+        task: optionalEnv("WARRANTY_TASK", "Return a short result for the Warranty CAP spike."),
+        requestedAt: new Date().toISOString(),
+      },
 };
 
 let stream = null;
@@ -63,3 +66,11 @@ console.log(
     delivery,
   }),
 );
+
+function parseTargetRequirements(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+}

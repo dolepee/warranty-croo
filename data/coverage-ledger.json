@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-06T16:05:00Z",
+  "updatedAt": "2026-07-06T16:30:00Z",
   "project": "Warranty",
   "network": {
     "name": "Base mainnet",
@@ -13,13 +13,15 @@
     "uniqueBuyerWallets": 5
   },
   "summary": {
-    "coveredOrders": 2,
-    "fulfilled": 1,
-    "refunded": 1,
-    "uniqueTargetAgents": 1,
+    "coveredOrders": 4,
+    "fulfilled": 2,
+    "refunded": 2,
+    "uniqueTargetAgents": 3,
     "uniqueBuyerWallets": 1,
-    "targetPaidUSDC": "0.02",
-    "reserveRefundedUSDC": "0.08"
+    "targetPaidUSDC": "0.12",
+    "reserveRefundedUSDC": "0.08",
+    "nativeRefundedUSDC": "0.08",
+    "targetRefundedUSDC": "0.05"
   },
   "publicWallets": {
     "warrantyAgent": "0x29b4EE3D78d641e3936e52F400227b3e8e4a8ABE",
@@ -62,6 +64,48 @@
       "refundTx": "0x4ddfe99dec8b0c96f6bd0cb752ebf378afa4551185b84403ef3e1e1d83ada744",
       "targetPaidUSDC": "0.01",
       "refundUSDC": "0.08"
+    },
+    {
+      "id": "coverage-2026-07-06-native-refund-payguard",
+      "label": "Target rejected with native refund",
+      "scope": "live coverage expansion",
+      "buyerLabel": "Warranty Buyer",
+      "buyerWallet": "0x5F3d43A2703740871F4345Bb2e4181103979aa1C",
+      "targetAgent": "PayGuard",
+      "targetServiceId": "53679342-5618-4142-a6c7-4ad13c88a1cb",
+      "requestedTargetServiceId": "5fccd3d5-d3ec-46e3-b137-bf05858999a7",
+      "outcome": "native_refunded",
+      "incomingOrderId": "696f7c53-eb65-4164-bdac-ffbc3677bfaf",
+      "targetOrderId": "d3940db4-f0ae-4ba3-9fbc-ed12eb33fbd3",
+      "buyerPaidWarrantyTx": "0x08f765b783aec7216403c69ff098248d889490e05e2f60ad29173cd6b7adf2aa",
+      "warrantyPaidTargetTx": "0x7bbf7dbc278753bb0db660a5f0ad7bfbc0e866555c55ccc02aa4ca6ed7941a4d",
+      "targetRejectTx": "0x05c391be1c6579bc552ddef3f08dde3d0c5bed2edf45f46bf646be1f23a7dcc0",
+      "warrantyRejectTx": "0xd4f287a7d358505b33d26a2c9c2e4df072e3bc94f0a387e43ca13d0d04c64f85",
+      "buyerRefundTx": "0xd4f287a7d358505b33d26a2c9c2e4df072e3bc94f0a387e43ca13d0d04c64f85",
+      "refundTx": "0xd4f287a7d358505b33d26a2c9c2e4df072e3bc94f0a387e43ca13d0d04c64f85",
+      "targetPaidUSDC": "0.05",
+      "targetRefundUSDC": "0.05",
+      "refundUSDC": "0.08",
+      "note": "The requested target refused new orders. Warranty paid PayGuard as a supervised fallback; PayGuard rejected, CROO refunded Warranty, then Warranty rejected the incoming order and CROO refunded the buyer."
+    },
+    {
+      "id": "coverage-2026-07-06-fulfilled-zeru",
+      "label": "ZERU report fulfilled",
+      "scope": "live coverage expansion",
+      "buyerLabel": "Warranty Buyer",
+      "buyerWallet": "0x5F3d43A2703740871F4345Bb2e4181103979aa1C",
+      "targetAgent": "ZERU",
+      "targetServiceId": "e8998099-6f03-4018-b1b5-b55ceccade3b",
+      "outcome": "fulfilled",
+      "incomingOrderId": "3d0dd11b-1667-4f8c-b5da-14a20b3dd9c0",
+      "targetOrderId": "1166a0ad-cd5f-4307-ad1a-12034f627c88",
+      "buyerPaidWarrantyTx": "0xaf79d1d797a9981d40e1fc7e105c2f04053852cf05c66780ab95c45e8707014e",
+      "warrantyPaidTargetTx": "0x200231a48b0acf3dbf0651c81436ff8465d72fc0cd6c83c6c098292024ca4c70",
+      "targetDeliveredTx": "0xd9fd1ad7092d6c7e967de64214c42aa98cfee2472d9f5a85ed82e3ab78019c15",
+      "warrantyDeliveredTx": "0x06625913d42157753ba4a0c9411ee93ed217e1dc6ac9cdcb70a51a0b7b176fdf",
+      "refundTx": null,
+      "targetPaidUSDC": "0.05",
+      "refundUSDC": "0"
     }
   ],
   "candidateTargets": [

@@ -43,11 +43,15 @@ if (incoming.status !== OrderStatus.Paid && incoming.status !== OrderStatus.Comp
 }
 
 const req = parseRequirements(await getIncomingRequirements(client, incoming));
-const targetServiceId = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
+const requestedTargetServiceId = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
+const targetServiceId = process.env.WARRANTY_FORCE_TARGET_SERVICE_ID || requestedTargetServiceId;
 if (!targetServiceId) throw new Error("incoming requirements must include targetServiceId or set WARRANTY_TARGET_SERVICE_ID");
 
-const targetRequirements = JSON.stringify(
-  req.targetRequirements || {
+const forcedTargetRequirements = process.env.WARRANTY_FORCE_TARGET_REQUIREMENTS;
+const targetRequirements = formatTargetRequirements(
+  forcedTargetRequirements
+    ? parseRequirements(forcedTargetRequirements)
+    : req.targetRequirements || {
     task: req.task || "Return a short paid result for the Warranty CAP spike.",
     buyerOrderId: incoming.orderId,
   },
@@ -60,6 +64,9 @@ const targetTimeoutMs =
 console.log(`incoming order ${incoming.orderId}`);
 console.log(`buyer wallet ${incoming.requesterWalletAddress}`);
 console.log(`target service ${targetServiceId}`);
+if (requestedTargetServiceId && requestedTargetServiceId !== targetServiceId) {
+  console.log(`forced fallback target ${targetServiceId} replacing requested ${requestedTargetServiceId}`);
+}
 
 const negotiation = await client.negotiateOrder({
   serviceId: targetServiceId,
@@ -95,7 +102,9 @@ if (fulfilled) {
     warranty: "fulfilled",
     incomingOrderId: incoming.orderId,
     buyerWallet: incoming.requesterWalletAddress,
+    requestedTargetServiceId,
     targetOrderId: targetOrder.orderId,
+    targetServiceId,
     targetPayTxHash: paid.txHash,
     targetDelivery: delivery,
   });
@@ -124,7 +133,9 @@ const result = await deliverJson(client, incoming.orderId, {
   warranty: "refunded",
   incomingOrderId: incoming.orderId,
   buyerWallet: incoming.requesterWalletAddress,
+  requestedTargetServiceId,
   targetOrderId: targetOrder.orderId,
+  targetServiceId,
   targetPayTxHash: paid.txHash,
   targetStatus: terminal.status,
   refund,
@@ -145,4 +156,8 @@ stream?.close();
 async function getIncomingRequirements(agentClient, order) {
   const negotiation = await agentClient.getNegotiation(order.negotiationId);
   return negotiation.requirements;
+}
+
+function formatTargetRequirements(value) {
+  return JSON.stringify(value);
 }

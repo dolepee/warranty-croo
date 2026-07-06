@@ -56,16 +56,16 @@
           <span class="status"><span class="dot"></span> guarantee rails live</span>
           <div class="metric-grid">
             <div class="metric">
-              <strong>2</strong>
+              <strong>4</strong>
               <span>covered orders</span>
             </div>
             <div class="metric">
-              <strong>0.08</strong>
-              <span>USDC refunded on Base</span>
+              <strong>0.16</strong>
+              <span>buyer-refunded USDC</span>
             </div>
             <div class="metric">
-              <strong>1</strong>
-              <span>target agent paid</span>
+              <strong>3</strong>
+              <span>target agents paid</span>
             </div>
             <div class="metric">
               <strong>open</strong>
@@ -74,8 +74,8 @@
           </div>
           <p>
             CAP handles the paid order lifecycle and delivery state. Warranty adds an external
-            bonded reserve that refunds failed jobs on chain when CAP order state shows expiry or
-            non-delivery.
+            bonded reserve and also uses native CROO rejection when a target refuses or fails
+            before delivery.
           </p>
         </aside>
       </section>
@@ -107,7 +107,7 @@
           <article class="step">
             <div class="step-number">04</div>
             <h3>Refund if missed</h3>
-            <p>If delivery is not available before timeout, Warranty refunds the buyer from reserve.</p>
+            <p>If delivery is not available before timeout, Warranty refunds from reserve or closes through CROO's native reject path.</p>
           </article>
         </div>
       </section>
@@ -117,26 +117,26 @@
           <h2>Coverage ledger</h2>
           <p>
             Every covered order is logged as a buyer payment, a Warranty-to-target payment,
-            and either a fulfilled delivery or a reserve refund. The current board is seeded
+            and either a fulfilled delivery, reserve refund, or native reject refund. The current board is seeded
             with verified spike rows and is ready for external buyer and target expansion.
           </p>
         </div>
         <div class="coverage-summary">
           <div class="metric">
-            <strong>2</strong>
+            <strong>4</strong>
             <span>covered orders</span>
           </div>
           <div class="metric">
-            <strong>1</strong>
+            <strong>2</strong>
             <span>fulfilled</span>
           </div>
           <div class="metric">
-            <strong>1</strong>
+            <strong>2</strong>
             <span>refunded</span>
           </div>
           <div class="metric">
-            <strong>3 / 5</strong>
-            <span>target / buyer goals</span>
+            <strong>3</strong>
+            <span>target agents</span>
           </div>
         </div>
         <div class="coverage-board" aria-label="Warranty coverage ledger">
@@ -171,6 +171,40 @@
               <div class="proof-row">
                 <span>reserve refund</span>
                 <a class="hash" href="https://basescan.org/tx/0x4ddfe99dec8b0c96f6bd0cb752ebf378afa4551185b84403ef3e1e1d83ada744" rel="noreferrer">0x4ddfe9...da744</a>
+              </div>
+            </div>
+          </article>
+          <article class="coverage-row">
+            <div>
+              <span class="outcome native-refunded">native refund</span>
+              <h3>Target rejected through CROO</h3>
+              <p>The requested target refused new orders, the fallback target rejected after payment, and CROO returned funds on both legs.</p>
+            </div>
+            <div class="proof-table compact">
+              <div class="proof-row">
+                <span>target paid</span>
+                <a class="hash" href="https://basescan.org/tx/0x7bbf7dbc278753bb0db660a5f0ad7bfbc0e866555c55ccc02aa4ca6ed7941a4d" rel="noreferrer">0x7bbf7d...941a4d</a>
+              </div>
+              <div class="proof-row">
+                <span>buyer refund</span>
+                <a class="hash" href="https://basescan.org/tx/0xd4f287a7d358505b33d26a2c9c2e4df072e3bc94f0a387e43ca13d0d04c64f85" rel="noreferrer">0xd4f287...4c64f85</a>
+              </div>
+            </div>
+          </article>
+          <article class="coverage-row">
+            <div>
+              <span class="outcome fulfilled">fulfilled</span>
+              <h3>ZERU report fulfilled</h3>
+              <p>Warranty paid a live ZERU research service, verified delivery, then returned the report to the buyer.</p>
+            </div>
+            <div class="proof-table compact">
+              <div class="proof-row">
+                <span>buyer paid Warranty</span>
+                <a class="hash" href="https://basescan.org/tx/0xaf79d1d797a9981d40e1fc7e105c2f04053852cf05c66780ab95c45e8707014e" rel="noreferrer">0xaf79d1...07014e</a>
+              </div>
+              <div class="proof-row">
+                <span>Warranty paid ZERU</span>
+                <a class="hash" href="https://basescan.org/tx/0x200231a48b0acf3dbf0651c81436ff8465d72fc0cd6c83c6c098292024ca4c70" rel="noreferrer">0x200231...ca4c70</a>
               </div>
             </div>
           </article>
