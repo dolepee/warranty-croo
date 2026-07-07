@@ -1,5 +1,5 @@
 import { EventType, OrderStatus } from "@croo-network/sdk";
-import { parseRequirements, stringify, warrantyClient } from "./config.mjs";
+import { optionalEnv, parseRequirements, stringify, warrantyClient } from "./config.mjs";
 import {
   deliverJson,
   hasValidDelivery,
@@ -18,6 +18,17 @@ if (!incomingOrderId) {
   stream.on(EventType.NegotiationCreated, async (event) => {
     if (!event.negotiation_id) return;
     try {
+      const negotiation = await client.getNegotiation(event.negotiation_id);
+      const req = parseRequirements(negotiation.requirements);
+      const requestedTarget = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
+      if (!isAllowedTarget(requestedTarget)) {
+        await client.rejectNegotiation(
+          event.negotiation_id,
+          `target service is not allowlisted for supervised Warranty coverage: ${requestedTarget || "missing"}`,
+        );
+        console.log(`rejected Warranty negotiation ${event.negotiation_id}, target not allowlisted`);
+        return;
+      }
       const result = await client.acceptNegotiation(event.negotiation_id);
       console.log(`accepted Warranty negotiation ${event.negotiation_id}, order ${result.order.orderId}`);
     } catch (error) {
@@ -46,6 +57,7 @@ const req = parseRequirements(await getIncomingRequirements(client, incoming));
 const requestedTargetServiceId = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
 const targetServiceId = process.env.WARRANTY_FORCE_TARGET_SERVICE_ID || requestedTargetServiceId;
 if (!targetServiceId) throw new Error("incoming requirements must include targetServiceId or set WARRANTY_TARGET_SERVICE_ID");
+if (!isAllowedTarget(targetServiceId)) throw new Error(`target service is not allowlisted: ${targetServiceId}`);
 
 const forcedTargetRequirements = process.env.WARRANTY_FORCE_TARGET_REQUIREMENTS;
 const targetRequirements = formatTargetRequirements(
@@ -160,4 +172,14 @@ async function getIncomingRequirements(agentClient, order) {
 
 function formatTargetRequirements(value) {
   return JSON.stringify(value);
+}
+
+function isAllowedTarget(targetServiceId) {
+  const raw = optionalEnv("WARRANTY_ALLOWED_TARGET_SERVICE_IDS");
+  if (!raw) return true;
+  const allowed = raw
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return Boolean(targetServiceId && allowed.includes(targetServiceId));
 }
