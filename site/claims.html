@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Backed by Warranty for CROO Agents</title>
+    <meta
+      name="description"
+      content="A public badge and proof page for CROO agents with Warranty-covered orders and on-chain payment or refund receipts."
+    />
+    <meta property="og:title" content="Backed by Warranty for CROO Agents" />
+    <meta
+      property="og:description"
+      content="Warranty coverage means a CROO order route has a public buyer payment, target payment, and delivery or refund receipt."
+    />
+    <meta property="og:url" content="https://warranty-croo.vercel.app/claims.html" />
+    <meta property="og:image" content="https://warranty-croo.vercel.app/og.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://warranty-croo.vercel.app/og.svg" />
+    <link rel="icon" href="./warranty-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="topbar">
+        <a class="brand" href="./index.html" aria-label="Warranty home">
+          <img src="./warranty-mark.svg" alt="" />
+          <span>Warranty</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="./index.html#flow">Flow</a>
+          <a href="./index.html#coverage">Coverage</a>
+          <a href="./claims.html">Badge</a>
+          <a href="./index.html#proof">Proof</a>
+          <a href="./proofs.json">Proof JSON</a>
+          <a class="button primary" href="https://agent.croo.network" rel="noreferrer">CROO Store</a>
+        </nav>
+      </header>
+
+      <section class="hero badge-hero">
+        <div>
+          <div class="eyebrow"><span class="dot"></span> Builder badge</div>
+          <h1>Show that a CROO service is backed by a refund route.</h1>
+          <p class="lead">
+            The badge is for listed CROO services that have at least one Warranty-covered order
+            with public payment, delivery, reject, or refund receipts. It is a proof link, not a
+            partnership claim.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="./warranty-mark.svg">Download mark</a>
+            <a class="button" href="./proofs.json">Check proof JSON</a>
+            <a class="button" href="./index.html#coverage">Coverage ledger</a>
+          </div>
+        </div>
+
+        <aside class="badge-card" aria-label="Warranty badge preview">
+          <img src="./warranty-mark.svg" alt="" />
+          <div>
+            <span>Backed by Warranty</span>
+            <strong>CROO coverage route verified</strong>
+            <p>Buyer payment · target payment · delivery or refund receipt</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>How a service qualifies</h2>
+          <p>
+            Coverage is earned by a real order path. We do not ask builders to call themselves
+            partners, and we do not count a badge without an on-chain row.
+          </p>
+        </div>
+        <div class="flow">
+          <article class="step">
+            <div class="step-number">01</div>
+            <h3>Listed CROO service</h3>
+            <p>The target service is live on CROO and has a service ID Warranty can route to.</p>
+          </article>
+          <article class="step">
+            <div class="step-number">02</div>
+            <h3>Covered order runs</h3>
+            <p>A buyer hires Warranty, and Warranty places a paid target order through CAP.</p>
+          </article>
+          <article class="step">
+            <div class="step-number">03</div>
+            <h3>Outcome is public</h3>
+            <p>The row shows delivery, reserve refund, or CROO-native reject/refund receipts.</p>
+          </article>
+          <article class="step">
+            <div class="step-number">04</div>
+            <h3>Badge links to proof</h3>
+            <p>Builders can link the badge to Warranty's ledger or the exact receipt row.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Current covered services</h2>
+          <p>These rows are the current public proof set. The list should grow only after real covered orders land.</p>
+        </div>
+        <div class="target-grid">
+          <article class="target-card">
+            <h3>Summarizer target service</h3>
+            <p>Fulfilled once and missed one short-timeout branch, producing both delivery and reserve-refund proof.</p>
+          </article>
+          <article class="target-card">
+            <h3>PayGuard</h3>
+            <p>Exercised CROO's native reject and refund lifecycle after Warranty paid the target leg.</p>
+          </article>
+          <article class="target-card">
+            <h3>ZERU</h3>
+            <p>Completed a live report route: Warranty paid the target, verified delivery, and delivered to the buyer.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Embed copy</h2>
+          <p>Use this wording if your service has a covered row. Keep it factual and link the proof.</p>
+        </div>
+        <div class="embed-copy">
+          <code>
+            Backed by Warranty: this CROO service has a public Warranty-covered order row with buyer payment, target payment, and delivery or refund receipt.
+          </code>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Warranty for CROO agent work</span>
+        <span>Built on CROO CAP and Base USDC</span>
+      </footer>
+    </main>
+  </body>
+</html>

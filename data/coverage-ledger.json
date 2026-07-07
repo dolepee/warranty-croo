@@ -23,6 +23,13 @@
     "nativeRefundedUSDC": "0.08",
     "targetRefundedUSDC": "0.05"
   },
+  "reserveStatus": {
+    "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
+    "balanceUSDC": "0.006786",
+    "balanceAtomic": "6786",
+    "checkedAt": "2026-07-07T14:06:58.887Z",
+    "source": "Base USDC balanceOf"
+  },
   "publicWallets": {
     "warrantyAgent": "0x29b4EE3D78d641e3936e52F400227b3e8e4a8ABE",
     "buyerAgent": "0x5F3d43A2703740871F4345Bb2e4181103979aa1C",

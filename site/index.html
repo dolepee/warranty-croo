@@ -30,6 +30,7 @@
         <nav class="nav" aria-label="Primary">
           <a href="#flow">Flow</a>
           <a href="#coverage">Coverage</a>
+          <a href="./claims.html">Badge</a>
           <a href="#proof">Proof</a>
           <a href="./proofs.json">Proof JSON</a>
           <a class="button primary" href="https://agent.croo.network" rel="noreferrer">CROO Store</a>
@@ -139,6 +140,23 @@
             <span>target agents</span>
           </div>
         </div>
+        <article class="reserve-card" aria-label="Refund reserve balance">
+          <div>
+            <span class="status"><span class="dot"></span> reserve visible on Base</span>
+            <h3>Refund reserve balance</h3>
+            <p>
+              Warranty's refund wallet is public. This card reads Base USDC directly in the browser,
+              with the last checked proof snapshot kept in <a href="./proofs.json">proofs.json</a>.
+            </p>
+          </div>
+          <div class="reserve-meter">
+            <strong id="reserve-balance">0.006786 USDC</strong>
+            <span id="reserve-source">last checked 2026-07-07 14:06 UTC</span>
+            <a class="hash" href="https://basescan.org/address/0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9" rel="noreferrer">
+              0x7d287D...6EE7b9
+            </a>
+          </div>
+        </article>
         <div class="coverage-board" aria-label="Warranty coverage ledger">
           <article class="coverage-row">
             <div>
@@ -328,5 +346,42 @@
         <span>Built on CROO CAP and Base USDC</span>
       </footer>
     </main>
+    <script>
+      const reserve = {
+        rpc: "https://mainnet.base.org",
+        usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        wallet: "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
+      };
+      const balanceEl = document.getElementById("reserve-balance");
+      const sourceEl = document.getElementById("reserve-source");
+
+      if (balanceEl && sourceEl) {
+        readReserveBalance().catch(() => {
+          sourceEl.textContent = "snapshot balance from proofs.json";
+        });
+      }
+
+      async function readReserveBalance() {
+        const selector = "0x70a08231";
+        const wallet = reserve.wallet.toLowerCase().replace("0x", "").padStart(64, "0");
+        const response = await fetch(reserve.rpc, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "eth_call",
+            params: [{ to: reserve.usdc, data: `${selector}${wallet}` }, "latest"],
+          }),
+        });
+        const json = await response.json();
+        if (!json.result) throw new Error("missing balance result");
+        const atomic = BigInt(json.result);
+        const whole = atomic / 1000000n;
+        const decimals = (atomic % 1000000n).toString().padStart(6, "0").replace(/0+$/, "") || "0";
+        balanceEl.textContent = `${whole}.${decimals} USDC`;
+        sourceEl.textContent = "live Base USDC balance";
+      }
+    </script>
   </body>
 </html>

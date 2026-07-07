@@ -61,6 +61,13 @@
       "nativeRefundedUSDC": "0.08",
       "targetRefundedUSDC": "0.05"
     },
+    "reserveStatus": {
+      "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
+      "balanceUSDC": "0.006786",
+      "balanceAtomic": "6786",
+      "checkedAt": "2026-07-07T14:06:58.887Z",
+      "source": "Base USDC balanceOf"
+    },
     "goals": {
       "coveredOrders": "grow every day before final submission",
       "uniqueTargetAgents": 3,

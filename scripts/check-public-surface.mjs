@@ -1,7 +1,19 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const roots = ["README.md", "SPIKE_STATUS.md", "DASHBOARD_SETUP.md", "data", "site"];
+const roots = [
+  "README.md",
+  "SPIKE_STATUS.md",
+  "DASHBOARD_SETUP.md",
+  "package.json",
+  ".env.example",
+  "data",
+  "docs",
+  "ops",
+  "scripts",
+  "site",
+  "src",
+];
 const forbidden = [
   /croo_sk_[a-z0-9]+/i,
   /0x[a-f0-9]{64}/i,
@@ -11,7 +23,9 @@ const forbidden = [
 const allowedPrivateKeyPlaceholder = "0xREPLACE_ME";
 const files = [];
 
-for (const root of roots) collect(root);
+for (const root of roots) {
+  if (existsSync(root)) collect(root);
+}
 
 const findings = [];
 for (const file of files) {

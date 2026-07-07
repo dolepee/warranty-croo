@@ -154,6 +154,54 @@ h1 {
   padding: 24px;
 }
 
+.badge-hero {
+  align-items: center;
+}
+
+.badge-card,
+.reserve-card,
+.embed-copy {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(16, 22, 18, 0.08);
+}
+
+.badge-card {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 24px;
+}
+
+.badge-card img {
+  height: 92px;
+  width: 92px;
+}
+
+.badge-card span {
+  color: var(--green-ink);
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.badge-card strong {
+  display: block;
+  font-size: clamp(26px, 3vw, 44px);
+  letter-spacing: 0;
+  line-height: 1;
+  margin-top: 8px;
+}
+
+.badge-card p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
 .proof-panel h2,
 .section h2 {
   font-size: clamp(24px, 3vw, 38px);
@@ -221,6 +269,51 @@ h1 {
 .coverage-board {
   display: grid;
   gap: 14px;
+}
+
+.reserve-card {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.35fr);
+  margin-bottom: 16px;
+  padding: 20px;
+}
+
+.reserve-card h3 {
+  font-size: 24px;
+  letter-spacing: 0;
+  line-height: 1.1;
+  margin: 14px 0 8px;
+}
+
+.reserve-card p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.reserve-card p a {
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.reserve-meter {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.reserve-meter strong {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.reserve-meter span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .coverage-row {
@@ -407,12 +500,25 @@ h1 {
   padding: 28px clamp(18px, 4vw, 58px);
 }
 
+.embed-copy {
+  padding: 18px;
+}
+
+.embed-copy code {
+  color: var(--green-ink);
+  display: block;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 900px) {
   .hero,
   .proofs,
   .flow,
   .coverage-summary,
   .coverage-row,
+  .reserve-card,
   .target-grid,
   .wallets {
     grid-template-columns: 1fr;
@@ -437,8 +543,13 @@ h1 {
 
   .hero > *,
   .nav,
-  .proof-panel {
+  .proof-panel,
+  .badge-card {
     max-width: 350px;
+  }
+
+  .badge-card {
+    grid-template-columns: 1fr;
   }
 
   .nav a,
