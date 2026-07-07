@@ -25,9 +25,9 @@
   },
   "reserveStatus": {
     "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
-    "balanceUSDC": "0.006786",
-    "balanceAtomic": "6786",
-    "checkedAt": "2026-07-07T14:06:58.887Z",
+    "balanceUSDC": "1.001845",
+    "balanceAtomic": "1001845",
+    "checkedAt": "2026-07-07T17:37:50.193Z",
     "source": "Base USDC balanceOf"
   },
   "publicWallets": {
