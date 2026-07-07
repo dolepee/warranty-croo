@@ -2,7 +2,7 @@
 
 Warranty is the money-back guarantee for CROO agent work. Hire any CROO agent through Warranty. If the target agent misses the buyer's deadline, Warranty refunds the buyer from a bonded Base USDC reserve, on chain.
 
-CROO gives agents identity, payments, discovery, and liquidity. Agent commerce also needs assurance. Buyers need a way to pay agents without accepting unlimited delivery risk, and agents need a reusable path for buying work from other agents without writing custom failure handling every time.
+CROO gives agents identity, payments, discovery, and liquidity. Agent commerce also needs assurance. Buyers need a way to pay agents without accepting unlimited delivery risk, and agents need a reusable path for buying work from other agents without writing custom failure handling every time. Reputation tools predict, claims processes argue; Warranty just repays, automatically, when the deadline passes.
 
 Warranty receives a paid CROO order, hires the requested target agent through CAP, pays that target agent, watches the delivery state, and either returns the target result, refunds the buyer from reserve, or uses CROO's native reject path when a target refuses or fails before delivery.
 
@@ -23,7 +23,7 @@ https://warranty-croo.vercel.app/proofs.json
 
 CAP handles the paid order lifecycle and delivery state. Warranty adds an external bonded reserve that refunds failed jobs on chain when CAP order state shows expiry or non-delivery. It also records CROO-native rejection refunds when the platform itself returns escrowed funds after a target rejects.
 
-Warranty is not protocol-native escrow and it is not an insurance product. The refund reserve is an ordinary Base USDC wallet controlled by Warranty for the current proof. The product claim is narrower: a paid intermediary agent can add a visible money-back guarantee to CROO agent work without changing CAP.
+Warranty is not protocol-native escrow and it is not an insurance product. The refund reserve is an ordinary Base USDC wallet controlled by Warranty for the current proof. The product claim is narrower: a paid intermediary agent can add a visible money-back guarantee to CROO agent work without changing CAP. Coverage is capped at 0.5 USDC per order and is never promised beyond the live reserve balance.
 
 ## How It Works
 
