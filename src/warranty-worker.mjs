@@ -22,7 +22,7 @@ if (incoming.status !== OrderStatus.Paid && incoming.status !== OrderStatus.Comp
   throw new Error(`incoming order ${incoming.orderId} is not paid, status=${incoming.status}`);
 }
 
-const req = parseRequirements(await getIncomingRequirements(client, incoming));
+const req = normalizeRequirements(parseRequirements(await getIncomingRequirements(client, incoming)));
 const requestedTargetServiceId = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
 const targetServiceId = process.env.WARRANTY_FORCE_TARGET_SERVICE_ID || requestedTargetServiceId;
 if (!targetServiceId) throw new Error("incoming requirements must include targetServiceId or set WARRANTY_TARGET_SERVICE_ID");
@@ -178,7 +178,7 @@ async function connectNegotiationStream(agentClient) {
     if (!event.negotiation_id) return;
     try {
       const negotiation = await agentClient.getNegotiation(event.negotiation_id);
-      const req = parseRequirements(negotiation.requirements);
+      const req = normalizeRequirements(parseRequirements(negotiation.requirements));
       const requestedTarget = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
       if (!isAllowedTarget(requestedTarget)) {
         await agentClient.rejectNegotiation(
@@ -211,6 +211,14 @@ function retryDelayMs(attempt) {
 
 function formatTargetRequirements(value) {
   return JSON.stringify(value);
+}
+
+function normalizeRequirements(value) {
+  if (value && typeof value === "object" && typeof value.text === "string") {
+    const parsed = parseRequirements(value.text);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+  }
+  return value && typeof value === "object" ? value : {};
 }
 
 function isAllowedTarget(targetServiceId) {

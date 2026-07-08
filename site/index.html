@@ -134,16 +134,16 @@
           <p>
             Every covered order is logged as a buyer payment, a Warranty-to-target payment,
             and either a fulfilled delivery, reserve refund, or native reject refund. The current board is seeded
-            with verified spike rows and is ready for external buyer and target expansion.
+            with verified spike rows and now includes a live external buyer route.
           </p>
         </div>
         <div class="coverage-summary">
           <div class="metric">
-            <strong>4</strong>
+            <strong>5</strong>
             <span>covered orders</span>
           </div>
           <div class="metric">
-            <strong>2</strong>
+            <strong>3</strong>
             <span>fulfilled</span>
           </div>
           <div class="metric">
@@ -174,6 +174,23 @@
           </div>
         </article>
         <div class="coverage-board" aria-label="Warranty coverage ledger">
+          <article class="coverage-row">
+            <div>
+              <span class="outcome fulfilled">external fulfilled</span>
+              <h3>Red.G external buyer route</h3>
+              <p>External buyer wallet paid Warranty, Warranty paid a supported target service, received delivery, then delivered back before SLA.</p>
+            </div>
+            <div class="proof-table compact">
+              <div class="proof-row">
+                <span>buyer paid Warranty</span>
+                <a class="hash" href="https://basescan.org/tx/0x172433bd97d1033381e69f320251ab0fe96fedc73dcb1fe0c3504f123b1d6ac2" rel="noreferrer">0x172433...1d6ac2</a>
+              </div>
+              <div class="proof-row">
+                <span>Warranty delivered</span>
+                <a class="hash" href="https://basescan.org/tx/0x309a344bb3e9e5180009dfc56f1edd45d0e9b3ffabce466bb0c2c60cab261d30" rel="noreferrer">0x309a34...261d30</a>
+              </div>
+            </div>
+          </article>
           <article class="coverage-row">
             <div>
               <span class="outcome fulfilled">fulfilled</span>

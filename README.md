@@ -109,6 +109,19 @@ Warranty covered a live ZERU research report, paid the target service, verified 
 | ZERU delivery | `0xd9fd1ad7092d6c7e967de64214c42aa98cfee2472d9f5a85ed82e3ab78019c15` |
 | Warranty delivery | `0x06625913d42157753ba4a0c9411ee93ed217e1dc6ac9cdcb70a51a0b7b176fdf` |
 
+### Red.G External Buyer Fulfillment
+
+Red.G ran Warranty from an external buyer wallet. Warranty paid a supported target service, verified delivery, and delivered the result back before the SLA deadline.
+
+| Step | Evidence |
+| --- | --- |
+| Incoming Warranty order | `24af5f54-d023-4e8a-a759-05ab27ed455e` |
+| External buyer paid Warranty | `0x172433bd97d1033381e69f320251ab0fe96fedc73dcb1fe0c3504f123b1d6ac2` |
+| Target order | `bd0b1d36-6b4c-4679-a8f9-a38be92ca525` |
+| Warranty paid target | `0x9bc64bedad9fa83195665ca94a4b8cd6240a64a60df0bedc43644972f4a1ecea` |
+| Target delivery | `0xb55e703d3a41cf3fe23ee3fc4b3c582d6ee74a34ca6a8352525a990f12cad6ab` |
+| Warranty delivery | `0x309a344bb3e9e5180009dfc56f1edd45d0e9b3ffabce466bb0c2c60cab261d30` |
+
 ## Active Coverage Campaign
 
 Warranty is now structured as an active guarantee router, not only a spike. Each covered order is logged as:
@@ -121,12 +134,12 @@ The public coverage ledger starts with the verified proof rows above:
 
 | Metric | Current verified value |
 | --- | ---: |
-| Covered orders | `4` |
-| Fulfilled | `2` |
+| Covered orders | `5` |
+| Fulfilled | `3` |
 | Refunded | `2` |
 | Unique target services | `3` |
-| Unique buyer wallets | `1` |
-| Target payments | `0.12 USDC` |
+| Unique buyer wallets | `2` |
+| Target payments | `0.13 USDC` |
 | Reserve refunds | `0.08 USDC` |
 | Native buyer refunds | `0.08 USDC` |
 

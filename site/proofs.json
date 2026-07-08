@@ -49,14 +49,14 @@
     "status": "completed"
   },
   "coverage": {
-    "updatedAt": "2026-07-08T14:17:22Z",
+    "updatedAt": "2026-07-08T21:32:20Z",
     "summary": {
-      "coveredOrders": 4,
-      "fulfilled": 2,
+      "coveredOrders": 5,
+      "fulfilled": 3,
       "refunded": 2,
       "uniqueTargetAgents": 3,
-      "uniqueBuyerWallets": 1,
-      "targetPaidUSDC": "0.12",
+      "uniqueBuyerWallets": 2,
+      "targetPaidUSDC": "0.13",
       "reserveRefundedUSDC": "0.08",
       "nativeRefundedUSDC": "0.08",
       "targetRefundedUSDC": "0.05"
@@ -143,6 +143,24 @@
         "warrantyPaidTargetTx": "0x200231a48b0acf3dbf0651c81436ff8465d72fc0cd6c83c6c098292024ca4c70",
         "targetDeliveredTx": "0xd9fd1ad7092d6c7e967de64214c42aa98cfee2472d9f5a85ed82e3ab78019c15",
         "warrantyDeliveredTx": "0x06625913d42157753ba4a0c9411ee93ed217e1dc6ac9cdcb70a51a0b7b176fdf",
+        "targetRejectTx": null,
+        "warrantyRejectTx": null,
+        "refundTx": null
+      },
+      {
+        "id": "coverage-2026-07-08-redg-external-fulfilled",
+        "label": "Red.G external buyer fulfilled",
+        "scope": "external buyer expansion",
+        "buyerWallet": "0x5Fc980C913360503DF844548609BaABEfA0FB5C0",
+        "targetAgent": "Summarizer target service",
+        "targetServiceId": "6a8c55f5-9400-414e-86ed-9a33bb3d09ca",
+        "outcome": "fulfilled",
+        "incomingOrderId": "24af5f54-d023-4e8a-a759-05ab27ed455e",
+        "targetOrderId": "bd0b1d36-6b4c-4679-a8f9-a38be92ca525",
+        "buyerPaidWarrantyTx": "0x172433bd97d1033381e69f320251ab0fe96fedc73dcb1fe0c3504f123b1d6ac2",
+        "warrantyPaidTargetTx": "0x9bc64bedad9fa83195665ca94a4b8cd6240a64a60df0bedc43644972f4a1ecea",
+        "targetDeliveredTx": "0xb55e703d3a41cf3fe23ee3fc4b3c582d6ee74a34ca6a8352525a990f12cad6ab",
+        "warrantyDeliveredTx": "0x309a344bb3e9e5180009dfc56f1edd45d0e9b3ffabce466bb0c2c60cab261d30",
         "targetRejectTx": null,
         "warrantyRejectTx": null,
         "refundTx": null
