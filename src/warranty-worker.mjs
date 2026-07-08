@@ -23,7 +23,15 @@ if (incoming.status !== OrderStatus.Paid && incoming.status !== OrderStatus.Comp
 }
 
 const req = normalizeRequirements(parseRequirements(await getIncomingRequirements(client, incoming)));
-const requestedTargetServiceId = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
+const requestedTargetServiceId = req.targetServiceId;
+if (!requestedTargetServiceId) {
+  await rejectIncoming(
+    incoming,
+    "Warranty requires JSON requirements with targetServiceId, timeoutMs, and targetRequirements; missing targetServiceId.",
+  );
+  stream?.close();
+  process.exit(0);
+}
 const targetServiceId = process.env.WARRANTY_FORCE_TARGET_SERVICE_ID || requestedTargetServiceId;
 if (!targetServiceId) throw new Error("incoming requirements must include targetServiceId or set WARRANTY_TARGET_SERVICE_ID");
 if (!isAllowedTarget(targetServiceId)) throw new Error(`target service is not allowlisted: ${targetServiceId}`);
@@ -179,7 +187,15 @@ async function connectNegotiationStream(agentClient) {
     try {
       const negotiation = await agentClient.getNegotiation(event.negotiation_id);
       const req = normalizeRequirements(parseRequirements(negotiation.requirements));
-      const requestedTarget = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
+      const requestedTarget = req.targetServiceId;
+      if (!requestedTarget) {
+        await agentClient.rejectNegotiation(
+          event.negotiation_id,
+          "Warranty requires JSON requirements with targetServiceId, timeoutMs, and targetRequirements.",
+        );
+        console.log(`rejected Warranty negotiation ${event.negotiation_id}, missing targetServiceId`);
+        return;
+      }
       if (!isAllowedTarget(requestedTarget)) {
         await agentClient.rejectNegotiation(
           event.negotiation_id,
@@ -201,6 +217,15 @@ async function connectNegotiationStream(agentClient) {
     if (process.env.CROO_VERBOSE === "1") console.log(`event ${event.type}`, event.order_id || event.negotiation_id || "");
   });
   return nextStream;
+}
+
+async function rejectIncoming(order, reason) {
+  if (order.status === OrderStatus.Paid) {
+    await client.rejectOrder(order.orderId, reason);
+    console.log(`rejected paid Warranty order ${order.orderId}: ${reason}`);
+    return;
+  }
+  throw new Error(`incoming order ${order.orderId} missing targetServiceId and status=${order.status}`);
 }
 
 function retryDelayMs(attempt) {

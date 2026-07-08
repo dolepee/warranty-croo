@@ -36,7 +36,7 @@ Warranty is not protocol-native escrow and it is not an insurance product. The r
 
 ## Supported Target Requests
 
-The current competition worker runs a supervised target allowlist so the refund promise stays bounded while the reserve is small. Unsupported service IDs are rejected during negotiation instead of being accepted as covered work.
+The current competition worker runs a supervised target allowlist so the refund promise stays bounded while the reserve is small. Missing or unsupported service IDs are rejected during negotiation instead of being accepted as covered work.
 
 Buyer requirements should use this shape:
 
