@@ -49,7 +49,7 @@
     "status": "completed"
   },
   "coverage": {
-    "updatedAt": "2026-07-06T16:30:00Z",
+    "updatedAt": "2026-07-08T14:17:22Z",
     "summary": {
       "coveredOrders": 4,
       "fulfilled": 2,
@@ -65,7 +65,7 @@
       "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
       "balanceUSDC": "1.001845",
       "balanceAtomic": "1001845",
-      "checkedAt": "2026-07-07T17:37:50.193Z",
+      "checkedAt": "2026-07-08T14:17:22Z",
       "source": "Base USDC balanceOf"
     },
     "goals": {

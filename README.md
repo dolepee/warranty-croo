@@ -1,6 +1,6 @@
 # Warranty
 
-Warranty is the money-back guarantee for CROO agent work. Hire any CROO agent through Warranty. If the target agent misses the buyer's deadline, Warranty refunds the buyer from a bonded Base USDC reserve, on chain.
+Warranty is the money-back guarantee for CROO agent work. Hire a supported CROO service through Warranty. If the target service misses the buyer's deadline, Warranty refunds the buyer from a bonded Base USDC reserve, on chain.
 
 CROO gives agents identity, payments, discovery, and liquidity. Agent commerce also needs assurance. Buyers need a way to pay agents without accepting unlimited delivery risk, and agents need a reusable path for buying work from other agents without writing custom failure handling every time. Reputation tools predict, claims processes argue; Warranty just repays, automatically, when the deadline passes.
 
@@ -28,11 +28,29 @@ Warranty is not protocol-native escrow and it is not an insurance product. The r
 ## How It Works
 
 1. A buyer pays Warranty through CROO CAP for `guaranteed_delivery`.
-2. The buyer specifies the target CROO service and task requirements.
+2. The buyer specifies a supported target CROO service and task requirements.
 3. Warranty places and pays a second CAP order to the target agent.
 4. Warranty monitors delivery state through CAP order and delivery reads.
 5. If the target delivers before timeout, Warranty forwards the result to the buyer.
 6. If delivery is missing after timeout, Warranty delivers a refund receipt and sends Base USDC from its bonded reserve to the buyer, or rejects through CROO when the platform can return the escrowed payment natively.
+
+## Supported Target Requests
+
+The current competition worker runs a supervised target allowlist so the refund promise stays bounded while the reserve is small. Unsupported service IDs are rejected during negotiation instead of being accepted as covered work.
+
+Buyer requirements should use this shape:
+
+```json
+{
+  "targetServiceId": "service-id",
+  "timeoutMs": 600000,
+  "targetRequirements": {
+    "task": "what the target service should do"
+  }
+}
+```
+
+Good targets are listed CROO services with clear, fast deliverables: reports, audits, data lookups, pricing recommendations, claim reviews, and verification tasks. New target services can be added to the allowlist before a covered run.
 
 ## Live Proof
 
@@ -198,6 +216,7 @@ export WARRANTY_SDK_KEY=croo_sk_...
 export WARRANTY_SERVICE_ID=...
 export BUYER_SDK_KEY=croo_sk_...
 export WARRANTY_TARGET_SERVICE_ID=...
+export WARRANTY_ALLOWED_TARGET_SERVICE_IDS=service-a,service-b
 
 export WARRANTY_RESERVE_PRIVATE_KEY=0x...
 export WARRANTY_REFUND_DRY_RUN=1
@@ -219,7 +238,7 @@ What is proven now:
 | Warranty delivers back to buyer | Live proof |
 | Warranty sends a real Base USDC refund | Live proof |
 | Coverage ledger and public board | Implemented |
-| At least three target services covered | Live proof |
+| At least three supported target services covered | Live proof |
 | More than five buyer wallets | In progress |
 
 ## Roadmap

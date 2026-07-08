@@ -1,5 +1,5 @@
 import { EventType, OrderStatus } from "@croo-network/sdk";
-import { optionalEnv, parseRequirements, stringify, warrantyClient } from "./config.mjs";
+import { optionalEnv, parseRequirements, sleep, stringify, warrantyClient } from "./config.mjs";
 import {
   deliverJson,
   hasValidDelivery,
@@ -11,42 +11,11 @@ import { refundBuyer } from "./refund.mjs";
 
 const client = warrantyClient();
 const incomingOrderId = process.env.WARRANTY_INCOMING_ORDER_ID;
+const intakeWaitMs = Number(process.env.WARRANTY_WAIT_MS || "180000");
 
-let stream = null;
-if (!incomingOrderId) {
-  stream = await client.connectWebSocket();
-  stream.on(EventType.NegotiationCreated, async (event) => {
-    if (!event.negotiation_id) return;
-    try {
-      const negotiation = await client.getNegotiation(event.negotiation_id);
-      const req = parseRequirements(negotiation.requirements);
-      const requestedTarget = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
-      if (!isAllowedTarget(requestedTarget)) {
-        await client.rejectNegotiation(
-          event.negotiation_id,
-          `target service is not allowlisted for supervised Warranty coverage: ${requestedTarget || "missing"}`,
-        );
-        console.log(`rejected Warranty negotiation ${event.negotiation_id}, target not allowlisted`);
-        return;
-      }
-      const result = await client.acceptNegotiation(event.negotiation_id);
-      console.log(`accepted Warranty negotiation ${event.negotiation_id}, order ${result.order.orderId}`);
-    } catch (error) {
-      console.warn(`could not accept negotiation ${event.negotiation_id}: ${error.message}`);
-    }
-  });
-  stream.on(EventType.OrderPaid, (event) => {
-    console.log(`Warranty order paid ${event.order_id || ""}`);
-  });
-  stream.onAny((event) => {
-    if (process.env.CROO_VERBOSE === "1") console.log(`event ${event.type}`, event.order_id || event.negotiation_id || "");
-  });
-  console.log("Warranty worker online. Waiting for a paid incoming order.");
-}
-
-const incomingSnapshot = incomingOrderId
-  ? await client.getOrder(incomingOrderId)
-  : await waitForPaidProviderOrder(client, Number(process.env.WARRANTY_WAIT_MS || "180000"));
+const { incomingSnapshot, stream } = incomingOrderId
+  ? { incomingSnapshot: await getIncomingOrderWithRetry(client, incomingOrderId), stream: null }
+  : await waitForPaidIncomingOrder(client, intakeWaitMs);
 const incoming = await client.getOrder(incomingSnapshot.orderId);
 
 if (incoming.status !== OrderStatus.Paid && incoming.status !== OrderStatus.Completed) {
@@ -168,6 +137,76 @@ stream?.close();
 async function getIncomingRequirements(agentClient, order) {
   const negotiation = await agentClient.getNegotiation(order.negotiationId);
   return negotiation.requirements;
+}
+
+async function waitForPaidIncomingOrder(agentClient, waitMs) {
+  const cycleMs = Math.min(waitMs, Number(process.env.WARRANTY_INTAKE_CYCLE_MS || "300000"));
+  let attempt = 0;
+
+  while (true) {
+    let activeStream = null;
+    try {
+      activeStream = await connectNegotiationStream(agentClient);
+      console.log("Warranty worker online. Waiting for a paid incoming order.");
+      const snapshot = await waitForPaidProviderOrder(agentClient, cycleMs);
+      return { incomingSnapshot: snapshot, stream: activeStream };
+    } catch (error) {
+      activeStream?.close?.();
+      const delayMs = retryDelayMs(attempt++);
+      console.warn(`Warranty intake wait failed: ${error.message}; retrying in ${Math.round(delayMs / 1000)}s`);
+      await sleep(delayMs);
+    }
+  }
+}
+
+async function getIncomingOrderWithRetry(agentClient, orderId) {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await agentClient.getOrder(orderId);
+    } catch (error) {
+      const delayMs = retryDelayMs(attempt++);
+      console.warn(`could not read incoming order ${orderId}: ${error.message}; retrying in ${Math.round(delayMs / 1000)}s`);
+      await sleep(delayMs);
+    }
+  }
+}
+
+async function connectNegotiationStream(agentClient) {
+  const nextStream = await agentClient.connectWebSocket();
+  nextStream.on(EventType.NegotiationCreated, async (event) => {
+    if (!event.negotiation_id) return;
+    try {
+      const negotiation = await agentClient.getNegotiation(event.negotiation_id);
+      const req = parseRequirements(negotiation.requirements);
+      const requestedTarget = req.targetServiceId || process.env.WARRANTY_TARGET_SERVICE_ID;
+      if (!isAllowedTarget(requestedTarget)) {
+        await agentClient.rejectNegotiation(
+          event.negotiation_id,
+          `target service is not allowlisted for supervised Warranty coverage: ${requestedTarget || "missing"}`,
+        );
+        console.log(`rejected Warranty negotiation ${event.negotiation_id}, target not allowlisted`);
+        return;
+      }
+      const result = await agentClient.acceptNegotiation(event.negotiation_id);
+      console.log(`accepted Warranty negotiation ${event.negotiation_id}, order ${result.order.orderId}`);
+    } catch (error) {
+      console.warn(`could not accept negotiation ${event.negotiation_id}: ${error.message}`);
+    }
+  });
+  nextStream.on(EventType.OrderPaid, (event) => {
+    console.log(`Warranty order paid ${event.order_id || ""}`);
+  });
+  nextStream.onAny((event) => {
+    if (process.env.CROO_VERBOSE === "1") console.log(`event ${event.type}`, event.order_id || event.negotiation_id || "");
+  });
+  return nextStream;
+}
+
+function retryDelayMs(attempt) {
+  const baseMs = Number(process.env.WARRANTY_RETRY_BASE_MS || "5000");
+  const maxMs = Number(process.env.WARRANTY_RETRY_MAX_MS || "60000");
+  return Math.min(maxMs, baseMs * 2 ** Math.min(attempt, 4));
 }
 
 function formatTargetRequirements(value) {

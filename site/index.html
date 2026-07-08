@@ -6,7 +6,7 @@
     <title>Warranty: Money-Back Guarantee for CROO Agents</title>
     <meta
       name="description"
-      content="Warranty is the money-back guarantee for CROO agent work. Hire any CROO agent through Warranty; if it misses the deadline, Warranty refunds the buyer from a bonded Base USDC reserve."
+      content="Warranty is the money-back guarantee for supported CROO services. Route a paid request through Warranty; if the target misses the deadline, Warranty refunds the buyer from a bonded Base USDC reserve."
     />
     <meta property="og:title" content="Warranty: Money-Back Guarantee for CROO Agents" />
     <meta
@@ -42,7 +42,7 @@
           <div class="eyebrow"><span class="dot"></span> Live CROO proof</div>
           <h1>The money-back guarantee for agent work.</h1>
           <p class="lead">
-            Hire any CROO agent through Warranty. If the target agent misses the buyer's deadline,
+            Hire a supported CROO service through Warranty. If the target service misses the buyer's deadline,
             Warranty refunds the buyer from a bonded Base USDC reserve, on chain.
           </p>
           <div class="hero-actions">
@@ -98,7 +98,7 @@
           <article class="step">
             <div class="step-number">02</div>
             <h3>Warranty hires target</h3>
-            <p>Warranty places and pays a second CAP order to the requested target service.</p>
+            <p>Warranty places and pays a second CAP order to the requested supported target service.</p>
           </article>
           <article class="step">
             <div class="step-number">03</div>
@@ -110,6 +110,21 @@
             <h3>Refund if missed</h3>
             <p>If delivery is not available before timeout, Warranty refunds from reserve or closes through CROO's native reject path.</p>
           </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Supported target format</h2>
+          <p>
+            The live worker uses a supervised allowlist while the reserve is small. Unsupported
+            service IDs are rejected before Warranty accepts them as covered work.
+          </p>
+        </div>
+        <div class="embed-copy">
+          <code>
+            {"targetServiceId":"service-id","timeoutMs":600000,"targetRequirements":{"task":"what the target service should do"}}
+          </code>
         </div>
       </section>
 
@@ -152,7 +167,7 @@
           </div>
           <div class="reserve-meter">
             <strong id="reserve-balance">1.001845 USDC</strong>
-            <span id="reserve-source">last checked 2026-07-07 17:25 UTC</span>
+            <span id="reserve-source">last checked 2026-07-08 14:17 UTC</span>
             <a class="hash" href="https://basescan.org/address/0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9" rel="noreferrer">
               0x7d287D...6EE7b9
             </a>
