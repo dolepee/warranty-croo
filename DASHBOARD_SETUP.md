@@ -1,6 +1,7 @@
-# CROO Dashboard Setup For Warranty Spike
+# CROO Dashboard Setup For Warranty
 
-Use this only to create the spike assets. It is not the final submission copy.
+Use this for the live CROO store listing. The listing copy should match the
+worker intake rules so external testers know the exact format before they pay.
 
 ## 1. Warranty Agent
 
@@ -10,7 +11,7 @@ Agent name:
 
 Short description:
 
-`Money back guarantee for CROO agent work. Hire through Warranty, and if the target agent fails to deliver, Warranty refunds the buyer from a bonded reserve.`
+`Refund-backed routing for supported CROO services. Warranty hires the target agent, forwards valid delivery, or refunds from a visible Base USDC reserve if the target misses the deadline.`
 
 Service name:
 
@@ -18,7 +19,7 @@ Service name:
 
 Service description:
 
-`Warranty receives a paid job, hires the requested target agent through CAP, pays that agent, monitors delivery, and returns the result. If the target fails to deliver before the timeout, Warranty returns a refund receipt backed by an on chain USDC refund from its reserve wallet.`
+`Warranty is a refund-backed router for supported CROO services. Paste the JSON request below. Warranty hires the requested allowlisted target, pays it through CAP, forwards a valid delivery, or refunds from the visible Base USDC reserve if the target misses the deadline. Unsupported targets, malformed JSON, missing targetRequirements, or targets above the configured price cap are rejected before Warranty accepts the job.`
 
 Suggested price:
 
@@ -30,15 +31,19 @@ Suggested delivery window:
 
 Input requirements:
 
-```json
-{
-  "targetServiceId": "target service id Warranty should hire",
-  "timeoutMs": 180000,
-  "targetRequirements": {
-    "task": "the task to send to the target agent"
-  }
-}
+```text
+Paste exactly this JSON for the controlled RateCard route:
+{"targetServiceId":"e97e8c6d-9eda-4f20-b76d-2af57ace608d","timeoutMs":600000,"targetRequirements":{"service_description":"Warranty, a refund-backed CROO route for supported agent services","current_price_usdc":0.08}}
+
+Supported format:
+{"targetServiceId":"<allowlisted CROO service id>","timeoutMs":600000,"targetRequirements":{"task":"target-specific JSON input"}}
+
+Free-form text is rejected. targetRequirements must be a JSON object. Current max target price: 0.10 USDC.
 ```
+
+Deliverable instructions:
+
+`Warranty returns JSON showing fulfilled or refunded status, incoming order id, buyer wallet, target order id, target service id, target pay transaction, target delivery when fulfilled, or refund transaction details when refunded.`
 
 Output shape:
 
@@ -56,6 +61,10 @@ Output shape:
 Important claim:
 
 `CAP handles the paid order lifecycle and delivery state. Warranty adds an external bonded reserve that refunds failed jobs on chain when CAP order state shows expiry or non delivery.`
+
+Do not claim:
+
+`Warranty is protocol-native escrow, insurance, or unlimited coverage. Coverage is capped at 0.5 USDC per order and never promised beyond the live reserve balance.`
 
 ## 2. Buyer Agent
 
