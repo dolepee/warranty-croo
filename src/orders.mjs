@@ -75,7 +75,13 @@ export async function deliverJson(client, orderId, payload) {
 
 export function hasValidDelivery(delivery) {
   if (!delivery) return false;
-  if (!delivery.deliverableText || !delivery.deliverableText.trim()) return false;
+  if (!hasContent(delivery.deliverableText) && !hasContent(delivery.deliverableSchema)) return false;
   const status = String(delivery.status || "").toLowerCase();
   return status === "submitted" || status === "accepted" || status === "delivered" || status === "completed" || status === "";
+}
+
+function hasContent(value) {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  return Boolean(trimmed && trimmed !== "[]" && trimmed !== "{}" && trimmed !== "null");
 }
