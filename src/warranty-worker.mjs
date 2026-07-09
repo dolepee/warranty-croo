@@ -8,6 +8,7 @@ import {
   waitForTerminalOrder,
 } from "./orders.mjs";
 import { refundBuyer } from "./refund.mjs";
+import { normalizeWarrantyRequest, parseUsdcAtomic, usdcToAtomic } from "./warranty-request.mjs";
 
 const client = warrantyClient();
 const incomingOrderId = process.env.WARRANTY_INCOMING_ORDER_ID;
@@ -22,33 +23,22 @@ if (incoming.status !== OrderStatus.Paid && incoming.status !== OrderStatus.Comp
   throw new Error(`incoming order ${incoming.orderId} is not paid, status=${incoming.status}`);
 }
 
-const req = normalizeRequirements(parseRequirements(await getIncomingRequirements(client, incoming)));
-const requestedTargetServiceId = req.targetServiceId;
-if (!requestedTargetServiceId) {
-  await rejectIncoming(
-    incoming,
-    "Warranty requires JSON requirements with targetServiceId, timeoutMs, and targetRequirements; missing targetServiceId.",
-  );
+const requestCheck = normalizeWarrantyRequest(parseRequirements(await getIncomingRequirements(client, incoming)), {
+  allowedTargetServiceIds: optionalEnv("WARRANTY_ALLOWED_TARGET_SERVICE_IDS"),
+  defaultTimeoutMs: Number(process.env.WARRANTY_TARGET_TIMEOUT_SECONDS || "600") * 1000,
+});
+if (!requestCheck.ok) {
+  await rejectIncoming(incoming, requestCheck.reason);
   stream?.close();
   process.exit(0);
 }
+const req = requestCheck.request;
+const requestedTargetServiceId = req.targetServiceId;
 const targetServiceId = process.env.WARRANTY_FORCE_TARGET_SERVICE_ID || requestedTargetServiceId;
-if (!targetServiceId) throw new Error("incoming requirements must include targetServiceId or set WARRANTY_TARGET_SERVICE_ID");
-if (!isAllowedTarget(targetServiceId)) throw new Error(`target service is not allowlisted: ${targetServiceId}`);
 
 const forcedTargetRequirements = process.env.WARRANTY_FORCE_TARGET_REQUIREMENTS;
-const targetRequirements = formatTargetRequirements(
-  forcedTargetRequirements
-    ? parseRequirements(forcedTargetRequirements)
-    : req.targetRequirements || {
-    task: req.task || "Return a short paid result for the Warranty CAP spike.",
-    buyerOrderId: incoming.orderId,
-  },
-);
-const targetTimeoutMs =
-  req.timeoutMs !== undefined
-    ? Number(req.timeoutMs)
-    : Number(process.env.WARRANTY_TARGET_TIMEOUT_SECONDS || "180") * 1000;
+const targetRequirements = JSON.stringify(forcedTargetRequirements ? parseRequirements(forcedTargetRequirements) : req.targetRequirements);
+const targetTimeoutMs = req.timeoutMs;
 
 console.log(`incoming order ${incoming.orderId}`);
 console.log(`buyer wallet ${incoming.requesterWalletAddress}`);
@@ -73,7 +63,15 @@ const targetOrder = await waitForCreatedOrderByNegotiation(
   "buyer",
   Number(process.env.WARRANTY_TARGET_ACCEPT_MS || "180000"),
 );
-console.log(`target order ${targetOrder.orderId} status=${targetOrder.status} price=${targetOrder.price}`);
+const targetOrderDetail = await client.getOrder(targetOrder.orderId);
+console.log(`target order ${targetOrder.orderId} status=${targetOrder.status} price=${targetOrderDetail.price || targetOrder.price}`);
+
+const priceCheck = checkTargetPrice(targetOrderDetail, targetOrder);
+if (!priceCheck.ok) {
+  await rejectIncoming(incoming, priceCheck.reason);
+  stream?.close();
+  process.exit(0);
+}
 
 const paid = await client.payOrder(targetOrder.orderId);
 console.log(`target paid ${paid.txHash}`);
@@ -186,22 +184,13 @@ async function connectNegotiationStream(agentClient) {
     if (!event.negotiation_id) return;
     try {
       const negotiation = await agentClient.getNegotiation(event.negotiation_id);
-      const req = normalizeRequirements(parseRequirements(negotiation.requirements));
-      const requestedTarget = req.targetServiceId;
-      if (!requestedTarget) {
-        await agentClient.rejectNegotiation(
-          event.negotiation_id,
-          "Warranty requires JSON requirements with targetServiceId, timeoutMs, and targetRequirements.",
-        );
-        console.log(`rejected Warranty negotiation ${event.negotiation_id}, missing targetServiceId`);
-        return;
-      }
-      if (!isAllowedTarget(requestedTarget)) {
-        await agentClient.rejectNegotiation(
-          event.negotiation_id,
-          `target service is not allowlisted for supervised Warranty coverage: ${requestedTarget || "missing"}`,
-        );
-        console.log(`rejected Warranty negotiation ${event.negotiation_id}, target not allowlisted`);
+      const requestCheck = normalizeWarrantyRequest(parseRequirements(negotiation.requirements), {
+        allowedTargetServiceIds: optionalEnv("WARRANTY_ALLOWED_TARGET_SERVICE_IDS"),
+        defaultTimeoutMs: Number(process.env.WARRANTY_TARGET_TIMEOUT_SECONDS || "600") * 1000,
+      });
+      if (!requestCheck.ok) {
+        await agentClient.rejectNegotiation(event.negotiation_id, requestCheck.reason);
+        console.log(`rejected Warranty negotiation ${event.negotiation_id}: ${requestCheck.reason}`);
         return;
       }
       const result = await agentClient.acceptNegotiation(event.negotiation_id);
@@ -234,24 +223,17 @@ function retryDelayMs(attempt) {
   return Math.min(maxMs, baseMs * 2 ** Math.min(attempt, 4));
 }
 
-function formatTargetRequirements(value) {
-  return JSON.stringify(value);
-}
-
-function normalizeRequirements(value) {
-  if (value && typeof value === "object" && typeof value.text === "string") {
-    const parsed = parseRequirements(value.text);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+function checkTargetPrice(targetOrderDetail, targetOrder) {
+  const rawPrice = targetOrderDetail.price || targetOrder.price || targetOrderDetail.amount || targetOrder.amount;
+  const targetPriceAtomic = parseUsdcAtomic(rawPrice);
+  if (targetPriceAtomic === null) return { ok: false, reason: "target order price was unreadable; Warranty did not pay it." };
+  const maxTargetPriceAtomic = usdcToAtomic(optionalEnv("WARRANTY_MAX_TARGET_PRICE_USDC", "0.10"));
+  if (maxTargetPriceAtomic === null) return { ok: false, reason: "WARRANTY_MAX_TARGET_PRICE_USDC is invalid." };
+  if (targetPriceAtomic > maxTargetPriceAtomic) {
+    return {
+      ok: false,
+      reason: `target price ${targetPriceAtomic} atomic USDC exceeds Warranty max ${maxTargetPriceAtomic} atomic USDC.`,
+    };
   }
-  return value && typeof value === "object" ? value : {};
-}
-
-function isAllowedTarget(targetServiceId) {
-  const raw = optionalEnv("WARRANTY_ALLOWED_TARGET_SERVICE_IDS");
-  if (!raw) return true;
-  const allowed = raw
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
-  return Boolean(targetServiceId && allowed.includes(targetServiceId));
+  return { ok: true };
 }

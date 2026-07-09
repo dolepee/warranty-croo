@@ -134,16 +134,16 @@
           <p>
             Every covered order is logged as a buyer payment, a Warranty-to-target payment,
             and either a fulfilled delivery, reserve refund, or native reject refund. The current board is seeded
-            with verified spike rows and now includes a live external buyer route.
+            with verified spike rows and now includes live external buyer routes.
           </p>
         </div>
         <div class="coverage-summary">
           <div class="metric">
-            <strong>5</strong>
+            <strong>6</strong>
             <span>covered orders</span>
           </div>
           <div class="metric">
-            <strong>3</strong>
+            <strong>4</strong>
             <span>fulfilled</span>
           </div>
           <div class="metric">
@@ -151,7 +151,7 @@
             <span>refunded</span>
           </div>
           <div class="metric">
-            <strong>3</strong>
+            <strong>4</strong>
             <span>target agents</span>
           </div>
         </div>
@@ -166,14 +166,31 @@
             </p>
           </div>
           <div class="reserve-meter">
-            <strong id="reserve-balance">1.001845 USDC</strong>
-            <span id="reserve-source">last checked 2026-07-08 14:17 UTC</span>
+            <strong id="reserve-balance">0.921845 USDC</strong>
+            <span id="reserve-source">last checked 2026-07-09 11:05 UTC</span>
             <a class="hash" href="https://basescan.org/address/0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9" rel="noreferrer">
               0x7d287D...6EE7b9
             </a>
           </div>
         </article>
         <div class="coverage-board" aria-label="Warranty coverage ledger">
+          <article class="coverage-row">
+            <div>
+              <span class="outcome fulfilled">external fulfilled</span>
+              <h3>Abdul external RateCard route</h3>
+              <p>External buyer wallet paid Warranty, Warranty paid RateCard, accepted a structured-schema delivery, then delivered back before SLA.</p>
+            </div>
+            <div class="proof-table compact">
+              <div class="proof-row">
+                <span>buyer paid Warranty</span>
+                <a class="hash" href="https://basescan.org/tx/0xb57d0bd61c5e9035836b76a3ce3537dc52c051a21d28a1551e370790b09cce37" rel="noreferrer">0xb57d0b...9cce37</a>
+              </div>
+              <div class="proof-row">
+                <span>Warranty delivered</span>
+                <a class="hash" href="https://basescan.org/tx/0xc0ab0d8ebb333b859143cfc564ae287473386a6faf48a20466696256dc46a845" rel="noreferrer">0xc0ab0d...46a845</a>
+              </div>
+            </div>
+          </article>
           <article class="coverage-row">
             <div>
               <span class="outcome fulfilled">external fulfilled</span>

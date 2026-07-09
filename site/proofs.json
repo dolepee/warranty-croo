@@ -49,23 +49,23 @@
     "status": "completed"
   },
   "coverage": {
-    "updatedAt": "2026-07-08T21:32:20Z",
+    "updatedAt": "2026-07-09T11:05:00Z",
     "summary": {
-      "coveredOrders": 5,
-      "fulfilled": 3,
+      "coveredOrders": 6,
+      "fulfilled": 4,
       "refunded": 2,
-      "uniqueTargetAgents": 3,
-      "uniqueBuyerWallets": 2,
-      "targetPaidUSDC": "0.13",
+      "uniqueTargetAgents": 4,
+      "uniqueBuyerWallets": 3,
+      "targetPaidUSDC": "0.23",
       "reserveRefundedUSDC": "0.08",
       "nativeRefundedUSDC": "0.08",
       "targetRefundedUSDC": "0.05"
     },
     "reserveStatus": {
       "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
-      "balanceUSDC": "1.001845",
-      "balanceAtomic": "1001845",
-      "checkedAt": "2026-07-08T14:17:22Z",
+      "balanceUSDC": "0.921845",
+      "balanceAtomic": "921845",
+      "checkedAt": "2026-07-09T11:05:00Z",
       "source": "Base USDC balanceOf"
     },
     "goals": {
@@ -161,6 +161,24 @@
         "warrantyPaidTargetTx": "0x9bc64bedad9fa83195665ca94a4b8cd6240a64a60df0bedc43644972f4a1ecea",
         "targetDeliveredTx": "0xb55e703d3a41cf3fe23ee3fc4b3c582d6ee74a34ca6a8352525a990f12cad6ab",
         "warrantyDeliveredTx": "0x309a344bb3e9e5180009dfc56f1edd45d0e9b3ffabce466bb0c2c60cab261d30",
+        "targetRejectTx": null,
+        "warrantyRejectTx": null,
+        "refundTx": null
+      },
+      {
+        "id": "coverage-2026-07-09-abdul-external-ratecard-fulfilled",
+        "label": "Abdul external buyer fulfilled",
+        "scope": "external buyer expansion",
+        "buyerWallet": "0x7186aaE0E22e590E97eBB8d6A6FD4274d64c2D0b",
+        "targetAgent": "RateCard",
+        "targetServiceId": "e97e8c6d-9eda-4f20-b76d-2af57ace608d",
+        "outcome": "fulfilled",
+        "incomingOrderId": "d2f6aedf-70fe-45df-aac4-f21b8482af46",
+        "targetOrderId": "483e5e5b-f4f8-40e7-9dba-d1ae9519079b",
+        "buyerPaidWarrantyTx": "0xb57d0bd61c5e9035836b76a3ce3537dc52c051a21d28a1551e370790b09cce37",
+        "warrantyPaidTargetTx": "0x37c1b403bc601901f3c310354c4a69d4b0eca79ea5c7ca43d7f43f8b0219b182",
+        "targetDeliveredTx": "0x00f9e28f3450c2ae5bf9dc03b0d567862f37b9d0d79509729d40f5cbe12ec1d0",
+        "warrantyDeliveredTx": "0xc0ab0d8ebb333b859143cfc564ae287473386a6faf48a20466696256dc46a845",
         "targetRejectTx": null,
         "warrantyRejectTx": null,
         "refundTx": null

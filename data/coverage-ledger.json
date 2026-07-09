@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-08T21:32:20Z",
+  "updatedAt": "2026-07-09T11:05:00Z",
   "project": "Warranty",
   "network": {
     "name": "Base mainnet",
@@ -13,21 +13,21 @@
     "uniqueBuyerWallets": 5
   },
   "summary": {
-    "coveredOrders": 5,
-    "fulfilled": 3,
+    "coveredOrders": 6,
+    "fulfilled": 4,
     "refunded": 2,
-    "uniqueTargetAgents": 3,
-    "uniqueBuyerWallets": 2,
-    "targetPaidUSDC": "0.13",
+    "uniqueTargetAgents": 4,
+    "uniqueBuyerWallets": 3,
+    "targetPaidUSDC": "0.23",
     "reserveRefundedUSDC": "0.08",
     "nativeRefundedUSDC": "0.08",
     "targetRefundedUSDC": "0.05"
   },
   "reserveStatus": {
     "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
-    "balanceUSDC": "1.001845",
-    "balanceAtomic": "1001845",
-    "checkedAt": "2026-07-08T14:17:22Z",
+    "balanceUSDC": "0.921845",
+    "balanceAtomic": "921845",
+    "checkedAt": "2026-07-09T11:05:00Z",
     "source": "Base USDC balanceOf"
   },
   "publicWallets": {
@@ -133,6 +133,27 @@
       "targetPaidUSDC": "0.01",
       "refundUSDC": "0",
       "note": "External buyer wallet paid Warranty; Warranty paid the supported target service, received delivery, and delivered back before the SLA deadline."
+    },
+    {
+      "id": "coverage-2026-07-09-abdul-external-ratecard-fulfilled",
+      "label": "Abdul external buyer fulfilled",
+      "scope": "external buyer expansion",
+      "buyerLabel": "Abdul / Manga Localizer",
+      "buyerWallet": "0x7186aaE0E22e590E97eBB8d6A6FD4274d64c2D0b",
+      "targetAgent": "RateCard",
+      "targetServiceId": "e97e8c6d-9eda-4f20-b76d-2af57ace608d",
+      "outcome": "fulfilled",
+      "incomingOrderId": "d2f6aedf-70fe-45df-aac4-f21b8482af46",
+      "targetOrderId": "483e5e5b-f4f8-40e7-9dba-d1ae9519079b",
+      "buyerPaidWarrantyTx": "0xb57d0bd61c5e9035836b76a3ce3537dc52c051a21d28a1551e370790b09cce37",
+      "warrantyPaidTargetTx": "0x37c1b403bc601901f3c310354c4a69d4b0eca79ea5c7ca43d7f43f8b0219b182",
+      "targetDeliveredTx": "0x00f9e28f3450c2ae5bf9dc03b0d567862f37b9d0d79509729d40f5cbe12ec1d0",
+      "targetClearTx": "0x2e329caee59d729e5b81719dafe17fb524ca608ee1f72a93aae45406e8ab76a3",
+      "warrantyDeliveredTx": "0xc0ab0d8ebb333b859143cfc564ae287473386a6faf48a20466696256dc46a845",
+      "refundTx": null,
+      "targetPaidUSDC": "0.10",
+      "refundUSDC": "0",
+      "note": "External buyer wallet paid Warranty with a text-wrapped JSON request. Warranty parsed the target service, paid RateCard, accepted a structured-schema delivery, and delivered the result back."
     }
   ],
   "candidateTargets": [

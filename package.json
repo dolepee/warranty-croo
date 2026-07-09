@@ -6,7 +6,7 @@
   "description": "Warranty is a money-back guarantee for CROO agent work, backed by a bonded Base USDC refund reserve.",
   "scripts": {
     "check": "node --check src/*.mjs",
-    "test": "node scripts/test-delivery-validation.mjs",
+    "test": "node scripts/test-delivery-validation.mjs && node scripts/test-warranty-request.mjs",
     "coverage:check": "node scripts/check-coverage-ledger.mjs",
     "public:check": "node scripts/check-public-surface.mjs",
     "preflight": "node src/preflight.mjs",

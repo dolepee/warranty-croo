@@ -36,7 +36,7 @@ Warranty is not protocol-native escrow and it is not an insurance product. The r
 
 ## Supported Target Requests
 
-The current competition worker runs a supervised target allowlist so the refund promise stays bounded while the reserve is small. Missing or unsupported service IDs are rejected during negotiation instead of being accepted as covered work.
+The current competition worker runs a supervised target allowlist so the refund promise stays bounded while the reserve is small. Missing or unsupported service IDs are rejected during negotiation instead of being accepted as covered work. The worker also refuses to pay a target order above `WARRANTY_MAX_TARGET_PRICE_USDC` before any target funds move.
 
 Buyer requirements should use this shape:
 
@@ -50,7 +50,7 @@ Buyer requirements should use this shape:
 }
 ```
 
-Good targets are listed CROO services with clear, fast deliverables: reports, audits, data lookups, pricing recommendations, claim reviews, and verification tasks. New target services can be added to the allowlist before a covered run.
+Good targets are listed CROO services with clear, fast deliverables: reports, audits, data lookups, pricing recommendations, claim reviews, and verification tasks. New target services can be added to the allowlist before a covered run. `targetRequirements` must be a JSON object tailored to that target service; free-form text is rejected before acceptance.
 
 ## Live Proof
 
@@ -122,6 +122,19 @@ Red.G ran Warranty from an external buyer wallet. Warranty paid a supported targ
 | Target delivery | `0xb55e703d3a41cf3fe23ee3fc4b3c582d6ee74a34ca6a8352525a990f12cad6ab` |
 | Warranty delivery | `0x309a344bb3e9e5180009dfc56f1edd45d0e9b3ffabce466bb0c2c60cab261d30` |
 
+### Abdul External Buyer Fulfillment
+
+Abdul ran Warranty from an external buyer wallet. Warranty parsed the text-wrapped JSON request, paid RateCard, accepted a structured-schema delivery, and delivered the result back before the SLA deadline.
+
+| Step | Evidence |
+| --- | --- |
+| Incoming Warranty order | `d2f6aedf-70fe-45df-aac4-f21b8482af46` |
+| External buyer paid Warranty | `0xb57d0bd61c5e9035836b76a3ce3537dc52c051a21d28a1551e370790b09cce37` |
+| Target order | `483e5e5b-f4f8-40e7-9dba-d1ae9519079b` |
+| Warranty paid RateCard | `0x37c1b403bc601901f3c310354c4a69d4b0eca79ea5c7ca43d7f43f8b0219b182` |
+| RateCard delivery | `0x00f9e28f3450c2ae5bf9dc03b0d567862f37b9d0d79509729d40f5cbe12ec1d0` |
+| Warranty delivery | `0xc0ab0d8ebb333b859143cfc564ae287473386a6faf48a20466696256dc46a845` |
+
 ## Active Coverage Campaign
 
 Warranty is now structured as an active guarantee router, not only a spike. Each covered order is logged as:
@@ -134,12 +147,12 @@ The public coverage ledger starts with the verified proof rows above:
 
 | Metric | Current verified value |
 | --- | ---: |
-| Covered orders | `5` |
-| Fulfilled | `3` |
+| Covered orders | `6` |
+| Fulfilled | `4` |
 | Refunded | `2` |
-| Unique target services | `3` |
-| Unique buyer wallets | `2` |
-| Target payments | `0.13 USDC` |
+| Unique target services | `4` |
+| Unique buyer wallets | `3` |
+| Target payments | `0.23 USDC` |
 | Reserve refunds | `0.08 USDC` |
 | Native buyer refunds | `0.08 USDC` |
 
@@ -230,6 +243,7 @@ export WARRANTY_SERVICE_ID=...
 export BUYER_SDK_KEY=croo_sk_...
 export WARRANTY_TARGET_SERVICE_ID=...
 export WARRANTY_ALLOWED_TARGET_SERVICE_IDS=service-a,service-b
+export WARRANTY_MAX_TARGET_PRICE_USDC=0.10
 
 export WARRANTY_RESERVE_PRIVATE_KEY=0x...
 export WARRANTY_REFUND_DRY_RUN=1
