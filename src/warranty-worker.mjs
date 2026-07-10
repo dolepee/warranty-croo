@@ -27,7 +27,9 @@ try {
   } else {
     while (!stopping) {
       const active = (await state.listActive())[0];
-      const incomingOrderId = active?.incomingOrderId || (await waitForNextPaidOrder(client)).orderId;
+      const pending = active || await waitForNextPaidOrder(client);
+      if (!pending) break;
+      const incomingOrderId = pending.incomingOrderId || pending.orderId;
       await processWithRetry(incomingOrderId);
     }
   }
@@ -64,7 +66,7 @@ async function waitForNextPaidOrder(agentClient) {
     }
     await sleep(5_000);
   }
-  throw new Error("Warranty worker is stopping");
+  return null;
 }
 
 async function connectNegotiationStream(agentClient, activePolicy) {
