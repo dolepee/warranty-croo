@@ -6,18 +6,11 @@ CROO gives agents identity, payments, discovery, and liquidity. Agent commerce a
 
 Warranty receives a paid CROO order, hires the requested target agent through CAP, pays that target agent, watches the delivery state, and either returns the target result, refunds the buyer from reserve, or uses CROO's native reject path when a target refuses or fails before delivery.
 
-Live proof surface:
+**Use Warranty:** [CROO agent listing](https://agent.croo.network/agents/8bf1ef7b-dee8-48a3-a155-76c6bb8fd424) · service `guaranteed_delivery` · ID `ab65f96b-7f94-4299-8646-7f8f7b96c432`
 
-```text
-https://warranty-croo.vercel.app
-```
+**Verify it:** [live product](https://warranty-croo.vercel.app) · [proof JSON](https://warranty-croo.vercel.app/proofs.json) · [`data/coverage-ledger.json`](data/coverage-ledger.json)
 
-Coverage ledger:
-
-```text
-data/coverage-ledger.json
-https://warranty-croo.vercel.app/proofs.json
-```
+![Warranty product preview](site/og.png)
 
 ## Honest Scope
 
@@ -36,7 +29,9 @@ Warranty is not protocol-native escrow and it is not an insurance product. The r
 
 ## Supported Target Requests
 
-The current competition worker runs a supervised target allowlist so the refund promise stays bounded while the reserve is small. Missing or unsupported service IDs are rejected during negotiation instead of being accepted as covered work. The worker also refuses to pay a target order above `WARRANTY_MAX_TARGET_PRICE_USDC` before any target funds move.
+The worker fails closed unless a supervised target allowlist is configured. It rejects unsupported targets, non-Base-USDC payments, coverage above `WARRANTY_COVERAGE_CAP_USDC` (hard ceiling: 0.5 USDC), target orders above `WARRANTY_MAX_TARGET_PRICE_USDC`, and deadlines outside the 60–3600 second policy window before target funds move. Active covered liabilities must fit inside the live refund reserve.
+
+Every external side effect is recoverable. A local order journal is written before target negotiation, target payment, refund, or buyer delivery. Target state is reconciled through CROO after a restart; reserve refunds are signed and hashed before broadcast so a restart can only rebroadcast the identical transaction, not create a second refund.
 
 Buyer requirements should use this shape:
 
@@ -193,8 +188,9 @@ The worker uses the CROO SDK for the full paid-order lifecycle:
 Install dependencies and run static checks:
 
 ```bash
-npm install
+npm ci
 npm run check
+npm test
 npm run coverage:check
 npm run public:check
 ```
@@ -224,10 +220,10 @@ For a local timeout test, list a stub target service and run:
 STUB_SDK_KEY=croo_sk_... npm run stub
 ```
 
-Then point the buyer request at the stub service and use a short timeout:
+Then point the buyer request at the stub service and use the minimum supported timeout:
 
 ```bash
-WARRANTY_TARGET_SERVICE_ID=$STUB_SERVICE_ID WARRANTY_TARGET_TIMEOUT_SECONDS=45 npm run buyer
+WARRANTY_TARGET_SERVICE_ID=$STUB_SERVICE_ID WARRANTY_TARGET_TIMEOUT_SECONDS=60 npm run buyer
 ```
 
 ## Environment
@@ -243,13 +239,18 @@ export WARRANTY_SERVICE_ID=...
 export BUYER_SDK_KEY=croo_sk_...
 export WARRANTY_TARGET_SERVICE_ID=...
 export WARRANTY_ALLOWED_TARGET_SERVICE_IDS=service-a,service-b
+export WARRANTY_COVERAGE_CAP_USDC=0.50
 export WARRANTY_MAX_TARGET_PRICE_USDC=0.10
+export WARRANTY_MIN_TIMEOUT_SECONDS=60
+export WARRANTY_TARGET_TIMEOUT_SECONDS=600
+export WARRANTY_MAX_TIMEOUT_SECONDS=3600
 
 export WARRANTY_RESERVE_PRIVATE_KEY=0x...
 export WARRANTY_REFUND_DRY_RUN=1
 ```
 
 Set `WARRANTY_REFUND_DRY_RUN=0` only when the refund reserve is intentionally funded and you are ready to send a real USDC refund.
+The provider refuses live intake in dry-run mode. Local-only testing must opt in with `WARRANTY_ALLOW_DRY_RUN_WORKER=1`.
 
 ## Public Release Scope
 
@@ -266,14 +267,15 @@ What is proven now:
 | Warranty sends a real Base USDC refund | Live proof |
 | Coverage ledger and public board | Implemented |
 | At least three supported target services covered | Live proof |
-| More than five buyer wallets | In progress |
+| Three distinct buyer wallets | Live proof |
 
 ## Roadmap
 
-Near-term work before final submission:
+Shipped during the competition: the public coverage board, live reserve read, Backed by Warranty badge, supervised target routing, external buyer rows, and crash-safe payment/refund recovery.
 
-1. Buyer expansion: add more real buyer wallets to the coverage ledger.
-2. Backed by Warranty badge: let target agents show they can be hired through a refund-backed path.
-3. Live coverage board: show fulfilled, refunded, pending, and reserve balance in one public view.
-4. More target agents: continue running the same flow across real CROO services.
-5. Marketplace expansion: Warranty is marketplace-agnostic; OKX.AI listing is the next venue after the CROO proof.
+Next:
+
+1. Expand to more independent buyer wallets and supported target agents.
+2. Move reserve policy into a protocol-native contract while retaining the same receipt format.
+3. Add per-target coverage pricing from observed delivery history.
+4. Extend the guarantee route to another agent marketplace after the CROO proof.

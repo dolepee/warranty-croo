@@ -14,10 +14,14 @@
       content="Paid CROO order, paid target order, timeout branch, delivery receipt, and real Base USDC refund."
     />
     <meta property="og:url" content="https://warranty-croo.vercel.app/" />
-    <meta property="og:image" content="https://warranty-croo.vercel.app/og.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://warranty-croo.vercel.app/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://warranty-croo.vercel.app/og.svg" />
+    <meta name="twitter:image" content="https://warranty-croo.vercel.app/og.png" />
+    <meta name="theme-color" content="#101612" />
+    <link rel="canonical" href="https://warranty-croo.vercel.app/" />
     <link rel="icon" href="./warranty-mark.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -28,27 +32,26 @@
           <span>Warranty</span>
         </a>
         <nav class="nav" aria-label="Primary">
-          <a href="#flow">Flow</a>
+          <a href="#flow">How it works</a>
           <a href="#coverage">Coverage</a>
-          <a href="./claims.html">Badge</a>
           <a href="#proof">Proof</a>
-          <a href="./proofs.json">Proof JSON</a>
-          <a class="button primary" href="https://agent.croo.network" rel="noreferrer">CROO Store</a>
+          <a href="https://github.com/dolepee/warranty-croo" rel="noreferrer">GitHub</a>
+          <a class="button primary" href="https://agent.croo.network/agents/8bf1ef7b-dee8-48a3-a155-76c6bb8fd424" rel="noreferrer">Hire Warranty</a>
         </nav>
       </header>
 
       <section class="hero">
         <div>
-          <div class="eyebrow"><span class="dot"></span> Live CROO proof</div>
-          <h1>The money-back guarantee for agent work.</h1>
+          <div class="eyebrow"><span class="dot"></span> Live on CROO CAP · Base mainnet</div>
+          <h1>Hire an agent. Get refunded if it misses the deadline.</h1>
           <p class="lead">
             Hire a supported CROO service through Warranty. If the target service misses the buyer's deadline,
             Warranty refunds the buyer from a bonded Base USDC reserve, on chain.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#proof">View proof</a>
-            <a class="button" href="./proofs.json">Proof JSON</a>
-            <a class="button" href="#flow">How it works</a>
+            <a class="button primary" href="https://agent.croo.network/agents/8bf1ef7b-dee8-48a3-a155-76c6bb8fd424" rel="noreferrer">Hire with Warranty</a>
+            <a class="button" href="#supported">Use the service</a>
+            <a class="button" href="#proof">Verify receipts</a>
           </div>
         </div>
 
@@ -57,7 +60,7 @@
           <span class="status"><span class="dot"></span> guarantee rails live</span>
           <div class="metric-grid">
             <div class="metric">
-              <strong>4</strong>
+              <strong data-proof-metric="coveredOrders">6</strong>
               <span>covered orders</span>
             </div>
             <div class="metric">
@@ -65,12 +68,12 @@
               <span>buyer-refunded USDC</span>
             </div>
             <div class="metric">
-              <strong>3</strong>
+              <strong data-proof-metric="uniqueTargetAgents">4</strong>
               <span>target agents paid</span>
             </div>
             <div class="metric">
-              <strong>open</strong>
-              <span>coverage campaign</span>
+              <strong data-proof-metric="uniqueBuyerWallets">3</strong>
+              <span>buyer wallets</span>
             </div>
           </div>
           <p>
@@ -113,7 +116,7 @@
         </div>
       </section>
 
-      <section class="section">
+      <section class="section" id="supported">
         <div class="section-header">
           <h2>Supported target format</h2>
           <p>
@@ -122,9 +125,12 @@
           </p>
         </div>
         <div class="embed-copy">
+          <strong>Service ID</strong>
+          <code>ab65f96b-7f94-4299-8646-7f8f7b96c432</code>
           <code>
-            {"targetServiceId":"service-id","timeoutMs":600000,"targetRequirements":{"task":"what the target service should do"}}
+            {"targetServiceId":"e97e8c6d-9eda-4f20-b76d-2af57ace608d","timeoutMs":600000,"targetRequirements":{"service_description":"your service","current_price_usdc":0.08}}
           </code>
+          <a class="button primary" href="https://agent.croo.network/agents/8bf1ef7b-dee8-48a3-a155-76c6bb8fd424" rel="noreferrer">Open Warranty on CROO</a>
         </div>
       </section>
 
@@ -139,19 +145,19 @@
         </div>
         <div class="coverage-summary">
           <div class="metric">
-            <strong>6</strong>
+            <strong data-proof-metric="coveredOrders">6</strong>
             <span>covered orders</span>
           </div>
           <div class="metric">
-            <strong>4</strong>
+            <strong data-proof-metric="fulfilled">4</strong>
             <span>fulfilled</span>
           </div>
           <div class="metric">
-            <strong>2</strong>
+            <strong data-proof-metric="refunded">2</strong>
             <span>refunded</span>
           </div>
           <div class="metric">
-            <strong>4</strong>
+            <strong data-proof-metric="uniqueTargetAgents">4</strong>
             <span>target agents</span>
           </div>
         </div>
@@ -393,7 +399,7 @@
 
       <footer class="footer">
         <span>Warranty for CROO agent work</span>
-        <span>Built on CROO CAP and Base USDC</span>
+        <span><a href="https://agent.croo.network/agents/8bf1ef7b-dee8-48a3-a155-76c6bb8fd424" rel="noreferrer">Hire</a> · <a href="https://github.com/dolepee/warranty-croo" rel="noreferrer">Source</a> · <a href="./proofs.json">Proof JSON</a></span>
       </footer>
     </main>
     <script>
@@ -410,6 +416,17 @@
           sourceEl.textContent = "snapshot balance from proofs.json";
         });
       }
+
+      fetch("./proofs.json")
+        .then((response) => response.json())
+        .then((proofs) => {
+          const summary = proofs.coverage?.summary || {};
+          document.querySelectorAll("[data-proof-metric]").forEach((element) => {
+            const value = summary[element.dataset.proofMetric];
+            if (value !== undefined) element.textContent = value;
+          });
+        })
+        .catch(() => {});
 
       async function readReserveBalance() {
         const selector = "0x70a08231";

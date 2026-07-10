@@ -1,218 +1,83 @@
 import { EventType, OrderStatus } from "@croo-network/sdk";
-import { optionalEnv, parseRequirements, sleep, stringify, warrantyClient } from "./config.mjs";
-import {
-  deliverJson,
-  hasValidDelivery,
-  waitForCreatedOrderByNegotiation,
-  waitForPaidProviderOrder,
-  waitForTerminalOrder,
-} from "./orders.mjs";
-import { refundBuyer } from "./refund.mjs";
-import { normalizeWarrantyRequest, parseUsdcAtomic, usdcToAtomic } from "./warranty-request.mjs";
+import { parseRequirements, sleep, warrantyClient } from "./config.mjs";
+import { processWarrantyOrder } from "./warranty-engine.mjs";
+import { loadWarrantyPolicy } from "./warranty-policy.mjs";
+import { normalizeWarrantyRequest } from "./warranty-request.mjs";
+import { WarrantyStateStore } from "./warranty-state.mjs";
 
 const client = warrantyClient();
-const incomingOrderId = process.env.WARRANTY_INCOMING_ORDER_ID;
-const intakeWaitMs = Number(process.env.WARRANTY_WAIT_MS || "180000");
-
-const { incomingSnapshot, stream } = incomingOrderId
-  ? { incomingSnapshot: await getIncomingOrderWithRetry(client, incomingOrderId), stream: null }
-  : await waitForPaidIncomingOrder(client, intakeWaitMs);
-const incoming = await client.getOrder(incomingSnapshot.orderId);
-
-if (incoming.status !== OrderStatus.Paid && incoming.status !== OrderStatus.Completed) {
-  throw new Error(`incoming order ${incoming.orderId} is not paid, status=${incoming.status}`);
+const policy = loadWarrantyPolicy();
+if (policy.refundDryRun && process.env.WARRANTY_ALLOW_DRY_RUN_WORKER !== "1") {
+  throw new Error("Warranty refuses live intake while refunds are in dry-run mode. Set real refunds or explicitly enable local dry-run intake.");
 }
+const state = new WarrantyStateStore();
+await state.acquireLock();
 
-const requestCheck = normalizeWarrantyRequest(parseRequirements(await getIncomingRequirements(client, incoming)), {
-  allowedTargetServiceIds: optionalEnv("WARRANTY_ALLOWED_TARGET_SERVICE_IDS"),
-  defaultTimeoutMs: Number(process.env.WARRANTY_TARGET_TIMEOUT_SECONDS || "600") * 1000,
-});
-if (!requestCheck.ok) {
-  await rejectIncoming(incoming, requestCheck.reason);
-  stream?.close();
-  process.exit(0);
-}
-const req = requestCheck.request;
-const requestedTargetServiceId = req.targetServiceId;
-const targetServiceId = process.env.WARRANTY_FORCE_TARGET_SERVICE_ID || requestedTargetServiceId;
+let stream = null;
+let stopping = false;
+installSignalHandlers();
 
-const forcedTargetRequirements = process.env.WARRANTY_FORCE_TARGET_REQUIREMENTS;
-const targetRequirements = JSON.stringify(forcedTargetRequirements ? parseRequirements(forcedTargetRequirements) : req.targetRequirements);
-const targetTimeoutMs = req.timeoutMs;
-
-console.log(`incoming order ${incoming.orderId}`);
-console.log(`buyer wallet ${incoming.requesterWalletAddress}`);
-console.log(`target service ${targetServiceId}`);
-if (requestedTargetServiceId && requestedTargetServiceId !== targetServiceId) {
-  console.log(`forced fallback target ${targetServiceId} replacing requested ${requestedTargetServiceId}`);
-}
-
-let negotiation;
 try {
-  negotiation = await client.negotiateOrder({
-    serviceId: targetServiceId,
-    requirements: targetRequirements,
-    metadata: JSON.stringify({
-      warrantyIncomingOrderId: incoming.orderId,
-      warrantyBuyerWallet: incoming.requesterWalletAddress,
-    }),
-  });
-} catch (error) {
-  await rejectBeforeTargetPayment(incoming, `target service did not accept negotiation: ${errorMessage(error)}`, {
-    requestedTargetServiceId,
-    targetServiceId,
-  });
-}
-console.log(`target negotiation ${negotiation.negotiationId}`);
+  stream = await connectNegotiationStream(client, policy);
+  console.log("Warranty worker online. Refund policy and durable recovery are armed.");
 
-let targetOrder;
-try {
-  targetOrder = await waitForCreatedOrderByNegotiation(
-    client,
-    negotiation.negotiationId,
-    "buyer",
-    Number(process.env.WARRANTY_TARGET_ACCEPT_MS || "180000"),
-  );
-} catch (error) {
-  await rejectBeforeTargetPayment(incoming, `target service did not create an order: ${errorMessage(error)}`, {
-    requestedTargetServiceId,
-    targetServiceId,
-    targetNegotiationId: negotiation.negotiationId,
-  });
-}
-const targetOrderDetail = await client.getOrder(targetOrder.orderId);
-console.log(`target order ${targetOrder.orderId} status=${targetOrder.status} price=${targetOrderDetail.price || targetOrder.price}`);
-
-const priceCheck = checkTargetPrice(targetOrderDetail, targetOrder);
-if (!priceCheck.ok) {
-  await rejectIncoming(incoming, priceCheck.reason);
+  const requestedOrderId = process.env.WARRANTY_INCOMING_ORDER_ID?.trim();
+  if (requestedOrderId) {
+    await processWithRetry(requestedOrderId);
+  } else {
+    while (!stopping) {
+      const active = (await state.listActive())[0];
+      const incomingOrderId = active?.incomingOrderId || (await waitForNextPaidOrder(client)).orderId;
+      await processWithRetry(incomingOrderId);
+    }
+  }
+} finally {
   stream?.close();
-  process.exit(0);
+  await state.releaseLock();
 }
 
-let paid;
-try {
-  paid = await client.payOrder(targetOrder.orderId);
-} catch (error) {
-  await rejectBeforeTargetPayment(incoming, `Warranty could not pay target before coverage began: ${errorMessage(error)}`, {
-    requestedTargetServiceId,
-    targetServiceId,
-    targetOrderId: targetOrder.orderId,
-  });
-}
-console.log(`target paid ${paid.txHash}`);
-
-const terminal = await waitForTerminalOrder(client, targetOrder.orderId, targetTimeoutMs);
-let delivery = null;
-let fulfilled = false;
-if (terminal.status === OrderStatus.Completed) {
-  delivery = await client.getDelivery(targetOrder.orderId);
-  fulfilled = hasValidDelivery(delivery);
-}
-
-if (fulfilled) {
-  const result = await deliverJson(client, incoming.orderId, {
-    warranty: "fulfilled",
-    incomingOrderId: incoming.orderId,
-    buyerWallet: incoming.requesterWalletAddress,
-    requestedTargetServiceId,
-    targetOrderId: targetOrder.orderId,
-    targetServiceId,
-    targetPayTxHash: paid.txHash,
-    targetDelivery: delivery,
-  });
-  console.log(
-    stringify({
-      ok: true,
-      outcome: "fulfilled",
-      incomingOrderId: incoming.orderId,
-      targetOrderId: targetOrder.orderId,
-      targetPayTxHash: paid.txHash,
-      warrantyDeliverTxHash: result.txHash,
-    }),
-  );
-  stream?.close();
-  process.exit(0);
-}
-
-const refund = await refundBuyer({
-  to: incoming.requesterWalletAddress,
-  amount: incoming.price,
-  token: incoming.paymentToken,
-  orderId: incoming.orderId,
-  reason: `target ${targetOrder.orderId} status=${terminal.status} delivery_valid=${fulfilled}`,
-});
-const result = await deliverJson(client, incoming.orderId, {
-  warranty: "refunded",
-  incomingOrderId: incoming.orderId,
-  buyerWallet: incoming.requesterWalletAddress,
-  requestedTargetServiceId,
-  targetOrderId: targetOrder.orderId,
-  targetServiceId,
-  targetPayTxHash: paid.txHash,
-  targetStatus: terminal.status,
-  refund,
-});
-console.log(
-  stringify({
-    ok: true,
-    outcome: "refunded",
-    incomingOrderId: incoming.orderId,
-    targetOrderId: targetOrder.orderId,
-    targetPayTxHash: paid.txHash,
-    warrantyDeliverTxHash: result.txHash,
-    refund,
-  }),
-);
-stream?.close();
-
-async function getIncomingRequirements(agentClient, order) {
-  const negotiation = await agentClient.getNegotiation(order.negotiationId);
-  return negotiation.requirements;
-}
-
-async function waitForPaidIncomingOrder(agentClient, waitMs) {
-  const cycleMs = Math.min(waitMs, Number(process.env.WARRANTY_INTAKE_CYCLE_MS || "300000"));
+async function processWithRetry(incomingOrderId) {
   let attempt = 0;
-
-  while (true) {
-    let activeStream = null;
+  while (!stopping) {
     try {
-      activeStream = await connectNegotiationStream(agentClient);
-      console.log("Warranty worker online. Waiting for a paid incoming order.");
-      const snapshot = await waitForPaidProviderOrder(agentClient, cycleMs);
-      return { incomingSnapshot: snapshot, stream: activeStream };
+      const result = await processWarrantyOrder({ client, incomingOrderId, state, policy });
+      console.log(JSON.stringify({ ok: true, incomingOrderId, stage: result.stage }));
+      return result;
     } catch (error) {
-      activeStream?.close?.();
-      const delayMs = retryDelayMs(attempt++);
-      console.warn(`Warranty intake wait failed: ${error.message}; retrying in ${Math.round(delayMs / 1000)}s`);
+      const delayMs = Math.min(30_000, 2_000 * 2 ** Math.min(attempt++, 4));
+      console.error(`Warranty order ${incomingOrderId} paused safely: ${error.message}; reconciling in ${delayMs / 1000}s`);
       await sleep(delayMs);
     }
   }
 }
 
-async function getIncomingOrderWithRetry(agentClient, orderId) {
-  let attempt = 0;
-  while (true) {
+async function waitForNextPaidOrder(agentClient) {
+  while (!stopping) {
     try {
-      return await agentClient.getOrder(orderId);
+      const paid = await agentClient.listOrders({ role: "provider", status: OrderStatus.Paid, page: 1, pageSize: 50 });
+      if (paid.length) {
+        const ordered = [...paid].sort((a, b) => String(a.createdTime || a.createdAt).localeCompare(String(b.createdTime || b.createdAt)));
+        return ordered[0];
+      }
     } catch (error) {
-      const delayMs = retryDelayMs(attempt++);
-      console.warn(`could not read incoming order ${orderId}: ${error.message}; retrying in ${Math.round(delayMs / 1000)}s`);
-      await sleep(delayMs);
+      console.warn(`Warranty intake poll failed: ${error.message}`);
     }
+    await sleep(5_000);
   }
+  throw new Error("Warranty worker is stopping");
 }
 
-async function connectNegotiationStream(agentClient) {
+async function connectNegotiationStream(agentClient, activePolicy) {
   const nextStream = await agentClient.connectWebSocket();
   nextStream.on(EventType.NegotiationCreated, async (event) => {
     if (!event.negotiation_id) return;
     try {
       const negotiation = await agentClient.getNegotiation(event.negotiation_id);
       const requestCheck = normalizeWarrantyRequest(parseRequirements(negotiation.requirements), {
-        allowedTargetServiceIds: optionalEnv("WARRANTY_ALLOWED_TARGET_SERVICE_IDS"),
-        defaultTimeoutMs: Number(process.env.WARRANTY_TARGET_TIMEOUT_SECONDS || "600") * 1000,
+        allowedTargetServiceIds: activePolicy.allowedTargetServiceIds.join(","),
+        defaultTimeoutMs: activePolicy.defaultTimeoutMs,
+        minTimeoutMs: activePolicy.minTimeoutMs,
+        maxTimeoutMs: activePolicy.maxTimeoutMs,
       });
       if (!requestCheck.ok) {
         await agentClient.rejectNegotiation(event.negotiation_id, requestCheck.reason);
@@ -222,66 +87,20 @@ async function connectNegotiationStream(agentClient) {
       const result = await agentClient.acceptNegotiation(event.negotiation_id);
       console.log(`accepted Warranty negotiation ${event.negotiation_id}, order ${result.order.orderId}`);
     } catch (error) {
-      console.warn(`could not accept negotiation ${event.negotiation_id}: ${error.message}`);
+      console.warn(`could not handle negotiation ${event.negotiation_id}: ${error.message}`);
     }
   });
   nextStream.on(EventType.OrderPaid, (event) => {
     console.log(`Warranty order paid ${event.order_id || ""}`);
   });
-  nextStream.onAny((event) => {
-    if (process.env.CROO_VERBOSE === "1") console.log(`event ${event.type}`, event.order_id || event.negotiation_id || "");
-  });
   return nextStream;
 }
 
-async function rejectIncoming(order, reason) {
-  if (order.status === OrderStatus.Paid) {
-    await client.rejectOrder(order.orderId, reason);
-    console.log(`rejected paid Warranty order ${order.orderId}: ${reason}`);
-    return;
+function installSignalHandlers() {
+  for (const signal of ["SIGINT", "SIGTERM"]) {
+    process.on(signal, () => {
+      stopping = true;
+      stream?.close();
+    });
   }
-  throw new Error(`incoming order ${order.orderId} missing targetServiceId and status=${order.status}`);
-}
-
-async function rejectBeforeTargetPayment(order, reason, details = {}) {
-  console.warn(reason);
-  await rejectIncoming(order, reason);
-  stream?.close();
-  console.log(
-    stringify({
-      ok: false,
-      outcome: "rejected_before_target_payment",
-      incomingOrderId: order.orderId,
-      reason,
-      ...details,
-    }),
-  );
-  process.exit(0);
-}
-
-function errorMessage(error) {
-  if (error?.reason) return error.reason;
-  if (error?.message) return error.message;
-  return String(error);
-}
-
-function retryDelayMs(attempt) {
-  const baseMs = Number(process.env.WARRANTY_RETRY_BASE_MS || "5000");
-  const maxMs = Number(process.env.WARRANTY_RETRY_MAX_MS || "60000");
-  return Math.min(maxMs, baseMs * 2 ** Math.min(attempt, 4));
-}
-
-function checkTargetPrice(targetOrderDetail, targetOrder) {
-  const rawPrice = targetOrderDetail.price || targetOrder.price || targetOrderDetail.amount || targetOrder.amount;
-  const targetPriceAtomic = parseUsdcAtomic(rawPrice);
-  if (targetPriceAtomic === null) return { ok: false, reason: "target order price was unreadable; Warranty did not pay it." };
-  const maxTargetPriceAtomic = usdcToAtomic(optionalEnv("WARRANTY_MAX_TARGET_PRICE_USDC", "0.10"));
-  if (maxTargetPriceAtomic === null) return { ok: false, reason: "WARRANTY_MAX_TARGET_PRICE_USDC is invalid." };
-  if (targetPriceAtomic > maxTargetPriceAtomic) {
-    return {
-      ok: false,
-      reason: `target price ${targetPriceAtomic} atomic USDC exceeds Warranty max ${maxTargetPriceAtomic} atomic USDC.`,
-    };
-  }
-  return { ok: true };
 }

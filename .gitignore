@@ -6,6 +6,7 @@ node_modules/
 *.log
 logs/
 .vercel/
+.warranty-state/
 out/
 sdk-inspect/
 croo-network-sdk-*.tgz

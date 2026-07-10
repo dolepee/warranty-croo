@@ -1,6 +1,7 @@
 import { parseRequirements } from "./config.mjs";
 
-const DEFAULT_MAX_TIMEOUT_MS = 86_400_000;
+const DEFAULT_MIN_TIMEOUT_MS = 60_000;
+const DEFAULT_MAX_TIMEOUT_MS = 3_600_000;
 
 export function normalizeWarrantyRequest(raw, options = {}) {
   const value = unwrapTextRequest(raw);
@@ -12,14 +13,22 @@ export function normalizeWarrantyRequest(raw, options = {}) {
   if (!targetServiceId) return invalid("Warranty requires targetServiceId.");
 
   const allowedTargets = parseAllowedTargets(options.allowedTargetServiceIds);
-  if (allowedTargets.length && !allowedTargets.includes(targetServiceId)) {
+  if (!allowedTargets.length) {
+    return invalid("Warranty target allowlist is unavailable; coverage is closed.");
+  }
+  if (!allowedTargets.includes(targetServiceId)) {
     return invalid(`target service is not allowlisted for supervised Warranty coverage: ${targetServiceId}`);
   }
 
   const targetRequirements = normalizeTargetRequirements(value.targetRequirements);
   if (!targetRequirements.ok) return invalid(targetRequirements.reason);
 
-  const timeoutMs = normalizeTimeoutMs(value.timeoutMs, options.defaultTimeoutMs, options.maxTimeoutMs);
+  const timeoutMs = normalizeTimeoutMs(
+    value.timeoutMs,
+    options.defaultTimeoutMs,
+    options.minTimeoutMs,
+    options.maxTimeoutMs,
+  );
   if (!timeoutMs.ok) return invalid(timeoutMs.reason);
 
   return {
@@ -77,9 +86,15 @@ function normalizeTargetRequirements(value) {
   return { ok: true, value: parsed };
 }
 
-function normalizeTimeoutMs(value, defaultTimeoutMs = 600_000, maxTimeoutMs = DEFAULT_MAX_TIMEOUT_MS) {
+function normalizeTimeoutMs(
+  value,
+  defaultTimeoutMs = 600_000,
+  minTimeoutMs = DEFAULT_MIN_TIMEOUT_MS,
+  maxTimeoutMs = DEFAULT_MAX_TIMEOUT_MS,
+) {
   const raw = value === undefined || value === null || value === "" ? defaultTimeoutMs : Number(value);
-  if (!Number.isFinite(raw) || raw < 1_000) return invalid("timeoutMs must be at least 1000 milliseconds.");
+  const min = Number(minTimeoutMs || DEFAULT_MIN_TIMEOUT_MS);
+  if (!Number.isFinite(raw) || raw < min) return invalid(`timeoutMs must be at least ${min} milliseconds.`);
   const max = Number(maxTimeoutMs || DEFAULT_MAX_TIMEOUT_MS);
   if (raw > max) return invalid(`timeoutMs must be no more than ${max} milliseconds.`);
   return { ok: true, value: Math.trunc(raw) };

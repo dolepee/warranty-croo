@@ -54,6 +54,14 @@ const badTimeout = normalizeWarrantyRequest({
 assert.equal(badTimeout.ok, false);
 assert.match(badTimeout.reason, /timeoutMs/);
 
+const missingAllowlist = normalizeWarrantyRequest({
+  targetServiceId: rateCard,
+  timeoutMs: 60000,
+  targetRequirements: { task: "run" },
+});
+assert.equal(missingAllowlist.ok, false);
+assert.match(missingAllowlist.reason, /allowlist is unavailable/);
+
 assert.equal(parseUsdcAtomic("100000"), 100000n);
 assert.equal(parseUsdcAtomic("100000.00000000"), 100000n);
 assert.equal(parseUsdcAtomic(""), null);

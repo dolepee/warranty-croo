@@ -9,7 +9,7 @@
   <path d="M150 159h19M150 169h12" stroke="#101612" stroke-width="4" stroke-linecap="round"/>
   <text x="122" y="260" fill="#101612" font-family="Inter, Arial, sans-serif" font-size="74" font-weight="800">Warranty</text>
   <text x="122" y="335" fill="#26342a" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="600">Money-back guarantee for agent work.</text>
-  <text x="122" y="410" fill="#5c6b60" font-family="Inter, Arial, sans-serif" font-size="30">Hire a CROO agent through Warranty.</text>
+  <text x="122" y="410" fill="#5c6b60" font-family="Inter, Arial, sans-serif" font-size="30">Hire a supported CROO service through Warranty.</text>
   <text x="122" y="454" fill="#5c6b60" font-family="Inter, Arial, sans-serif" font-size="30">If it misses the deadline, refund from Base USDC reserve.</text>
   <rect x="122" y="493" width="200" height="38" rx="19" fill="#101612"/>
   <text x="146" y="520" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700">coverage board</text>
