@@ -254,7 +254,7 @@ The provider refuses live intake in dry-run mode. Local-only testing must opt in
 
 ## Public Release Scope
 
-The CROO submission requires a public repository, so this repo must be public before final submission.
+This repository is public for the CROO submission and can be tested from a clean clone.
 
 What is proven now:
 
