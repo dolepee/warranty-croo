@@ -29,7 +29,7 @@ Warranty is not protocol-native escrow and it is not an insurance product. The r
 
 ## Supported Target Requests
 
-The worker fails closed unless a supervised target allowlist is configured. It rejects unsupported targets, non-Base-USDC payments, coverage above `WARRANTY_COVERAGE_CAP_USDC` (hard ceiling: 0.5 USDC), target orders above `WARRANTY_MAX_TARGET_PRICE_USDC`, and deadlines outside the 60–3600 second policy window before target funds move. Active covered liabilities must fit inside the live refund reserve.
+The worker fails closed unless a supervised target allowlist is configured. It rejects unsupported targets, non-Base-USDC payments, coverage above `WARRANTY_COVERAGE_CAP_USDC` (hard ceiling: 0.5 USDC), target orders above `WARRANTY_MAX_TARGET_PRICE_USDC`, and deadlines outside the 60–3600 second policy window before target funds move. Target-price enforcement uses CROO's actual atomic `feeAmount` (plus any same-token `fundAmount`) rather than the sometimes different listing `price`. Active covered liabilities must fit inside the live refund reserve.
 
 Every external side effect is recoverable. A local order journal is written before target negotiation, target payment, refund, or buyer delivery. Target state is reconciled through CROO after a restart; reserve refunds are signed and hashed before broadcast so a restart can only rebroadcast the identical transaction, not create a second refund.
 

@@ -69,14 +69,47 @@ export function validateIncomingCoverage(order, policy) {
 }
 
 export function validateTargetOrder(order, policy) {
-  const incoming = validateIncomingCoverage(order, {
-    ...policy,
-    coverageCapAtomic: policy.maxTargetPriceAtomic,
-  });
-  if (!incoming.ok) {
-    return invalid(`Target order is outside Warranty policy: ${incoming.reason}`);
+  let token;
+  try {
+    token = getAddress(order.paymentToken || "");
+  } catch {
+    return invalid("Target order is outside Warranty policy: payment token is not Base USDC.");
   }
-  return incoming;
+  if (token !== policy.baseUsdc) {
+    return invalid("Target order is outside Warranty policy: payment token is not Base USDC.");
+  }
+
+  const reportedPriceAtomic = parseUsdcAtomic(order.price);
+  const feeAmountAtomic = parseUsdcAtomic(order.feeAmount);
+  const escrowFeeAtomic = feeAmountAtomic && feeAmountAtomic > 0n ? feeAmountAtomic : reportedPriceAtomic;
+  if (escrowFeeAtomic === null || escrowFeeAtomic <= 0n) {
+    return invalid("Target order is outside Warranty policy: actual escrow fee is unavailable or zero.");
+  }
+
+  const fundAmountAtomic = parseUsdcAtomic(order.fundAmount) || 0n;
+  if (fundAmountAtomic > 0n) {
+    let fundToken;
+    try {
+      fundToken = getAddress(order.fundToken || "");
+    } catch {
+      return invalid("Target order is outside Warranty policy: fund-transfer token is invalid.");
+    }
+    if (fundToken !== policy.baseUsdc) {
+      return invalid("Target order is outside Warranty policy: fund transfers must also use Base USDC.");
+    }
+  }
+
+  const amountAtomic = escrowFeeAtomic + fundAmountAtomic;
+  if (amountAtomic > policy.maxTargetPriceAtomic) {
+    return invalid(`Target order is outside Warranty policy: actual payment ${amountAtomic} exceeds ${policy.maxTargetPriceAtomic} atomic USDC.`);
+  }
+  return {
+    ok: true,
+    amountAtomic,
+    feeAmountAtomic: escrowFeeAtomic,
+    fundAmountAtomic,
+    token,
+  };
 }
 
 function parseUsdcConfig(value, name) {

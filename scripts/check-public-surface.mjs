@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const roots = [
+  ".github",
   "README.md",
   "SPIKE_STATUS.md",
   "DASHBOARD_SETUP.md",
@@ -52,7 +53,7 @@ function collect(path) {
     for (const entry of readdirSync(path)) collect(join(path, entry));
     return;
   }
-  if (/\.(html|css|svg|json|md|mjs|txt)$/.test(path)) files.push(path);
+  if (/\.(html|css|svg|json|md|mjs|txt|ya?ml)$/.test(path)) files.push(path);
 }
 
 function isTransactionHashContext(text, index) {
