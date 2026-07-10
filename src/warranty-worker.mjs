@@ -47,22 +47,39 @@ if (requestedTargetServiceId && requestedTargetServiceId !== targetServiceId) {
   console.log(`forced fallback target ${targetServiceId} replacing requested ${requestedTargetServiceId}`);
 }
 
-const negotiation = await client.negotiateOrder({
-  serviceId: targetServiceId,
-  requirements: targetRequirements,
-  metadata: JSON.stringify({
-    warrantyIncomingOrderId: incoming.orderId,
-    warrantyBuyerWallet: incoming.requesterWalletAddress,
-  }),
-});
+let negotiation;
+try {
+  negotiation = await client.negotiateOrder({
+    serviceId: targetServiceId,
+    requirements: targetRequirements,
+    metadata: JSON.stringify({
+      warrantyIncomingOrderId: incoming.orderId,
+      warrantyBuyerWallet: incoming.requesterWalletAddress,
+    }),
+  });
+} catch (error) {
+  await rejectBeforeTargetPayment(incoming, `target service did not accept negotiation: ${errorMessage(error)}`, {
+    requestedTargetServiceId,
+    targetServiceId,
+  });
+}
 console.log(`target negotiation ${negotiation.negotiationId}`);
 
-const targetOrder = await waitForCreatedOrderByNegotiation(
-  client,
-  negotiation.negotiationId,
-  "buyer",
-  Number(process.env.WARRANTY_TARGET_ACCEPT_MS || "180000"),
-);
+let targetOrder;
+try {
+  targetOrder = await waitForCreatedOrderByNegotiation(
+    client,
+    negotiation.negotiationId,
+    "buyer",
+    Number(process.env.WARRANTY_TARGET_ACCEPT_MS || "180000"),
+  );
+} catch (error) {
+  await rejectBeforeTargetPayment(incoming, `target service did not create an order: ${errorMessage(error)}`, {
+    requestedTargetServiceId,
+    targetServiceId,
+    targetNegotiationId: negotiation.negotiationId,
+  });
+}
 const targetOrderDetail = await client.getOrder(targetOrder.orderId);
 console.log(`target order ${targetOrder.orderId} status=${targetOrder.status} price=${targetOrderDetail.price || targetOrder.price}`);
 
@@ -73,7 +90,16 @@ if (!priceCheck.ok) {
   process.exit(0);
 }
 
-const paid = await client.payOrder(targetOrder.orderId);
+let paid;
+try {
+  paid = await client.payOrder(targetOrder.orderId);
+} catch (error) {
+  await rejectBeforeTargetPayment(incoming, `Warranty could not pay target before coverage began: ${errorMessage(error)}`, {
+    requestedTargetServiceId,
+    targetServiceId,
+    targetOrderId: targetOrder.orderId,
+  });
+}
 console.log(`target paid ${paid.txHash}`);
 
 const terminal = await waitForTerminalOrder(client, targetOrder.orderId, targetTimeoutMs);
@@ -215,6 +241,28 @@ async function rejectIncoming(order, reason) {
     return;
   }
   throw new Error(`incoming order ${order.orderId} missing targetServiceId and status=${order.status}`);
+}
+
+async function rejectBeforeTargetPayment(order, reason, details = {}) {
+  console.warn(reason);
+  await rejectIncoming(order, reason);
+  stream?.close();
+  console.log(
+    stringify({
+      ok: false,
+      outcome: "rejected_before_target_payment",
+      incomingOrderId: order.orderId,
+      reason,
+      ...details,
+    }),
+  );
+  process.exit(0);
+}
+
+function errorMessage(error) {
+  if (error?.reason) return error.reason;
+  if (error?.message) return error.message;
+  return String(error);
 }
 
 function retryDelayMs(attempt) {
