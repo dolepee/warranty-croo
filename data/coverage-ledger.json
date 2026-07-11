@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-11T06:51:00Z",
+  "updatedAt": "2026-07-11T17:28:00Z",
   "project": "Warranty",
   "network": {
     "name": "Base mainnet",
@@ -13,12 +13,12 @@
     "uniqueBuyerWallets": 5
   },
   "summary": {
-    "coveredOrders": 7,
-    "fulfilled": 5,
+    "coveredOrders": 8,
+    "fulfilled": 6,
     "refunded": 2,
     "uniqueTargetAgents": 5,
-    "uniqueBuyerWallets": 4,
-    "targetPaidUSDC": "0.33",
+    "uniqueBuyerWallets": 5,
+    "targetPaidUSDC": "0.43",
     "reserveRefundedUSDC": "0.08",
     "nativeRefundedUSDC": "0.08",
     "targetRefundedUSDC": "0.05"
@@ -177,6 +177,28 @@
       "targetPaidUSDC": "0.10",
       "refundUSDC": "0",
       "note": "BABYYODA paid Warranty from an external buyer wallet. Warranty routed to GhostWriter, which returned an accepted originality result and minted a Base NFT attestation before Warranty delivered the result back."
+    },
+    {
+      "id": "coverage-2026-07-11-remi-external-ratecard-fulfilled",
+      "label": "Remi external buyer fulfilled",
+      "scope": "external buyer expansion",
+      "buyerLabel": "Remi / Macro Intelligence",
+      "buyerWallet": "0xB402DC99AD786F4778C72E08EA0fD610EC4c5339",
+      "targetAgent": "RateCard",
+      "targetServiceId": "e97e8c6d-9eda-4f20-b76d-2af57ace608d",
+      "outcome": "fulfilled",
+      "incomingOrderId": "ae78663d-8440-4e48-88cf-70c8750e1cee",
+      "targetOrderId": "e1c51262-9858-46df-ab56-034b70290bbd",
+      "buyerPaidWarrantyTx": "0x064d159381489c2fdff6e31da2a09ef49e3522b18753225011e7a9fbfac44d5e",
+      "warrantyPaidTargetTx": "0xe74aab6ed1c8497668ea8ace3aa33bb84a2de45c1abe6906df85f6eb90f202ab",
+      "targetDeliveredTx": "0xf8badae7f0af1f762098a35be31947f18179432d10c33c4d41e120763a2bd9fc",
+      "targetClearTx": "0x39e798d2d4648aaef78b7024c0596759a1c0f82ab798319f48b9bb22b335c48e",
+      "warrantyDeliveredTx": "0xd709c1887f5e6f1c3fd508f46d97d1abe690abee865e61c0d48fa995caadadff",
+      "warrantyClearTx": "0x58dae7caff4635fc99e73b192d14c0c4210f8a6dfdc86ae46ca7685108b8caad",
+      "refundTx": null,
+      "targetPaidUSDC": "0.10",
+      "refundUSDC": "0",
+      "note": "Remi's external buyer wallet paid Warranty. Warranty routed to RateCard, returned its accepted pricing report before the SLA deadline, and then completed a separate reciprocal Gas Tracker purchase from Remi's agent."
     }
   ],
   "candidateTargets": [

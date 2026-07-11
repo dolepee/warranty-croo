@@ -132,7 +132,7 @@ Abdul ran Warranty from an external buyer wallet. Warranty parsed the text-wrapp
 
 ### BABYYODA External GhostWriter Fulfillment
 
-BABYYODA ran Warranty from a new external buyer wallet, bringing the public ledger to four distinct buyer wallets. Warranty paid GhostWriter, received an accepted originality result plus a Base NFT attestation, and delivered the result back before the SLA deadline.
+BABYYODA ran Warranty from a new external buyer wallet. Warranty paid GhostWriter, received an accepted originality result plus a Base NFT attestation, and delivered the result back before the SLA deadline.
 
 | Step | Evidence |
 | --- | --- |
@@ -143,6 +143,22 @@ BABYYODA ran Warranty from a new external buyer wallet, bringing the public ledg
 | GhostWriter NFT attestation tx | `0x0b8f6e7f365492583d0042e2716af96b40161d4e5b5786004d5b32ffb65f2cbd` |
 | GhostWriter delivery tx | `0xb7a342c027b5e4025c6eca1563bd89a0cc98e264d7355fd4f03f2076fdce9be0` |
 | Warranty delivery tx | `0x18ad04b4a8a5b73e32c36932f9ced26ccfae2b884f9e9e13f6e7f9b9ce45d8a7` |
+
+### Remi External Buyer Fulfillment
+
+Remi's Macro Intelligence agent ran Warranty from a fifth distinct buyer wallet. Warranty paid RateCard, returned its accepted pricing report before the SLA deadline, and then bought Remi's Gas Tracker in the reciprocal direction. The covered route and the separate A2A purchase both settled on Base.
+
+| Step | Evidence |
+| --- | --- |
+| Incoming Warranty order | `ae78663d-8440-4e48-88cf-70c8750e1cee` |
+| External buyer paid Warranty | `0x064d159381489c2fdff6e31da2a09ef49e3522b18753225011e7a9fbfac44d5e` |
+| RateCard target order | `e1c51262-9858-46df-ab56-034b70290bbd` |
+| Warranty paid RateCard | `0xe74aab6ed1c8497668ea8ace3aa33bb84a2de45c1abe6906df85f6eb90f202ab` |
+| RateCard delivery | `0xf8badae7f0af1f762098a35be31947f18179432d10c33c4d41e120763a2bd9fc` |
+| Warranty delivery | `0xd709c1887f5e6f1c3fd508f46d97d1abe690abee865e61c0d48fa995caadadff` |
+| Reciprocal Gas Tracker order | `ba970332-b196-4b6e-ba3f-dcbfe989e3f2` |
+| Warranty paid Gas Tracker | `0x6206a9f60d282075f0f8589f103b5b8eeb084ab843b6be09556b9c8a146f26f8` |
+| Gas Tracker delivery | `0xa18fe5651dc321e610b9cc0d7861c31dbc6e4e0a8ed6bb08f155481b3a156722` |
 
 ## Active Coverage Campaign
 
@@ -156,16 +172,16 @@ The public coverage ledger starts with the verified proof rows above:
 
 | Metric | Current verified value |
 | --- | ---: |
-| Covered orders | `7` |
-| Fulfilled | `5` |
+| Covered orders | `8` |
+| Fulfilled | `6` |
 | Refunded | `2` |
 | Unique target services | `5` |
-| Unique buyer wallets | `4` |
-| Target payments | `0.33 USDC` |
+| Unique buyer wallets | `5` |
+| Target payments | `0.43 USDC` |
 | Reserve refunds | `0.08 USDC` |
 | Native buyer refunds | `0.08 USDC` |
 
-The competition expansion target is now five unique buyer wallets before final submission. New rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
+The competition expansion target of five distinct buyer wallets is now met in the clean public ledger. New rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
 
 ## Public Wallets
 
@@ -300,7 +316,7 @@ What is proven now:
 | Warranty sends a real Base USDC refund | Live proof |
 | Coverage ledger and public board | Implemented |
 | At least three supported target services covered | Live proof |
-| Four distinct buyer wallets | Live proof |
+| Five distinct buyer wallets | Live proof |
 | Polling fallback, runtime heartbeat, and stalled-worker restart | Implemented and canary-tested |
 
 ## Roadmap
