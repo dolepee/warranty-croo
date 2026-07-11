@@ -1,5 +1,6 @@
 import { formatUnits } from "viem";
-import { optionalEnv, stringify } from "./config.mjs";
+import { optionalEnv, stringify, warrantyClient } from "./config.mjs";
+import { probeCrooContract } from "./croo-contract.mjs";
 import { createRefundClients, getReserveBalance } from "./refund.mjs";
 import { loadWarrantyPolicy } from "./warranty-policy.mjs";
 import { WarrantyStateStore } from "./warranty-state.mjs";
@@ -50,9 +51,25 @@ if (!dryRun && process.env.WARRANTY_RESERVE_PRIVATE_KEY && policy) {
   }
 }
 
+let crooCompatibility = null;
+let crooCompatibilityError = null;
+if (process.env.WARRANTY_SDK_KEY) {
+  try {
+    crooCompatibility = await probeCrooContract(warrantyClient());
+    if (!crooCompatibility.ok) {
+      crooCompatibilityError = crooCompatibility.checks
+        .filter((check) => !check.ok)
+        .map((check) => `${check.name}: ${check.error}`)
+        .join("; ");
+    }
+  } catch (error) {
+    crooCompatibilityError = error.message;
+  }
+}
+
 const missing = checks.filter((check) => check.required && !check.present);
 const report = {
-  ok: missing.length === 0 && !policyError && !reserveError,
+  ok: missing.length === 0 && !policyError && !reserveError && !crooCompatibilityError,
   mode: dryRun ? "dry-run refund" : "real refund",
   checks,
   missing: missing.map((check) => check.name),
@@ -63,11 +80,17 @@ const report = {
         coverageCapAtomic: policy.coverageCapAtomic.toString(),
         maxTargetPriceAtomic: policy.maxTargetPriceAtomic.toString(),
         timeoutBoundsMs: [policy.minTimeoutMs, policy.maxTimeoutMs],
+        buyerRateLimit: {
+          maxOrders: policy.maxOrdersPerBuyerWindow,
+          windowSeconds: policy.buyerWindowMs / 1000,
+        },
       }
     : null,
   policyError,
   reserve,
   reserveError,
+  crooCompatibility,
+  crooCompatibilityError,
   next: "Run npm run provider only when this report returns ok: true.",
 };
 

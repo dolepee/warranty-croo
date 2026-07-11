@@ -29,7 +29,7 @@ Warranty is not protocol-native escrow and it is not an insurance product. The r
 
 ## Supported Target Requests
 
-The worker fails closed unless a supervised target allowlist is configured. It rejects unsupported targets, non-Base-USDC payments, coverage above `WARRANTY_COVERAGE_CAP_USDC` (hard ceiling: 0.5 USDC), target orders above `WARRANTY_MAX_TARGET_PRICE_USDC`, and deadlines outside the 60–3600 second policy window before target funds move. Target-price enforcement uses CROO's actual atomic `feeAmount` (plus any same-token `fundAmount`) rather than the sometimes different listing `price`. Active covered liabilities must fit inside the live refund reserve.
+The worker fails closed unless a supervised target allowlist is configured. It rejects unsupported targets, non-Base-USDC payments, coverage above `WARRANTY_COVERAGE_CAP_USDC` (hard ceiling: 0.5 USDC), target orders above `WARRANTY_MAX_TARGET_PRICE_USDC`, and deadlines outside the configured submission policy before target funds move. The live runtime uses a 600–3600 second deadline window and one covered order per buyer wallet per rolling 24 hours. Target-price enforcement uses CROO's actual atomic `feeAmount` (plus any same-token `fundAmount`) rather than the sometimes different listing `price`. Active covered liabilities must fit inside the live refund reserve.
 
 Every external side effect is recoverable. A local order journal is written before target negotiation, target payment, refund, or buyer delivery. Target state is reconciled through CROO after a restart; reserve refunds are signed and hashed before broadcast so a restart can only rebroadcast the identical transaction, not create a second refund.
 
@@ -197,6 +197,19 @@ The worker uses the CROO SDK for the full paid-order lifecycle:
 | Completion events | `EventType.OrderCompleted` |
 | Expiry events | `EventType.OrderExpired` |
 
+## Autonomous Reliability
+
+The submission runtime does not depend on a single WebSocket callback or an in-memory happy path:
+
+- Startup runs live read-only probes for CROO's provider/requester order and negotiation roles. Intake stays closed if that contract is incompatible.
+- Pending negotiations are accepted through both the WebSocket stream and a five-second polling fallback.
+- CROO reads and mutations have bounded deadlines; ambiguous mutations reconcile from CROO state before any retry can move money again.
+- Every money-moving stage is journaled atomically in `.warranty-state/`. Recovery searches metadata-linked negotiations and orders instead of creating duplicates.
+- A submitted incoming delivery remains pending through CROO's `delivering` and `evaluating` states. Warranty only records `FULFILLED` after CROO reports completion.
+- The worker writes a 15-second heartbeat. A separate launchd watchdog checks it every 60 seconds and replaces a stalled process; `caffeinate -i` prevents idle system sleep while the provider is running.
+
+These paths are covered by fault-injection tests for negotiation creation, target-order creation, target payment, incoming delivery submission, final delivery, and refund broadcasting.
+
 ## Run Locally
 
 Install dependencies and run static checks:
@@ -214,6 +227,7 @@ Useful inspection commands:
 ```bash
 npm run inspect
 npm run preflight
+npm run health:check
 ```
 
 Start the Warranty worker:
@@ -255,9 +269,14 @@ export WARRANTY_TARGET_SERVICE_ID=...
 export WARRANTY_ALLOWED_TARGET_SERVICE_IDS=service-a,service-b
 export WARRANTY_COVERAGE_CAP_USDC=0.50
 export WARRANTY_MAX_TARGET_PRICE_USDC=0.10
-export WARRANTY_MIN_TIMEOUT_SECONDS=60
+export WARRANTY_MIN_TIMEOUT_SECONDS=600
 export WARRANTY_TARGET_TIMEOUT_SECONDS=600
 export WARRANTY_MAX_TIMEOUT_SECONDS=3600
+export WARRANTY_CROO_READ_TIMEOUT_SECONDS=30
+export WARRANTY_CROO_WRITE_TIMEOUT_SECONDS=120
+export WARRANTY_HEALTH_MAX_AGE_SECONDS=90
+export WARRANTY_MAX_ORDERS_PER_BUYER_WINDOW=1
+export WARRANTY_BUYER_WINDOW_SECONDS=86400
 
 export WARRANTY_RESERVE_PRIVATE_KEY=0x...
 export WARRANTY_REFUND_DRY_RUN=1
@@ -282,10 +301,11 @@ What is proven now:
 | Coverage ledger and public board | Implemented |
 | At least three supported target services covered | Live proof |
 | Four distinct buyer wallets | Live proof |
+| Polling fallback, runtime heartbeat, and stalled-worker restart | Implemented and canary-tested |
 
 ## Roadmap
 
-Shipped during the competition: the public coverage board, live reserve read, Backed by Warranty badge, supervised target routing, external buyer rows, and crash-safe payment/refund recovery.
+Shipped during the competition: the public coverage board, live reserve read, Backed by Warranty badge, supervised target routing, external buyer rows, crash-safe payment/refund recovery, dual-path intake, and autonomous runtime health monitoring.
 
 Next:
 

@@ -1,5 +1,6 @@
 import { AgentClient, EventType, OrderStatus } from "@croo-network/sdk";
 import { crooConfig, optionalEnv, stringify } from "./config.mjs";
+import { CROO_ORDER_ROLE } from "./croo-contract.mjs";
 
 const proto = Object.getOwnPropertyNames(AgentClient.prototype).filter((name) => name !== "constructor");
 const required = [
@@ -37,8 +38,8 @@ const key = optionalEnv("WARRANTY_SDK_KEY");
 if (key) {
   const client = new AgentClient(crooConfig(), key);
   const [providerOrders, requesterOrders] = await Promise.all([
-    client.listOrders({ role: "provider", page: 1, pageSize: 5 }).catch((error) => ({ error: error.message })),
-    client.listOrders({ role: "buyer", page: 1, pageSize: 5 }).catch((error) => ({ error: error.message })),
+    client.listOrders({ role: CROO_ORDER_ROLE.provider, page: 1, pageSize: 5 }).catch((error) => ({ error: error.message })),
+    client.listOrders({ role: CROO_ORDER_ROLE.requester, page: 1, pageSize: 5 }).catch((error) => ({ error: error.message })),
   ]);
   report.live = { providerOrders, requesterOrders };
 } else {

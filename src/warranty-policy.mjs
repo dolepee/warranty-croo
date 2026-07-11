@@ -38,6 +38,15 @@ export function loadWarrantyPolicy(env = process.env) {
     throw new Error("WARRANTY_TARGET_TIMEOUT_SECONDS must be inside the configured timeout bounds.");
   }
 
+  const maxOrdersPerBuyerWindow = parsePositiveInteger(
+    env.WARRANTY_MAX_ORDERS_PER_BUYER_WINDOW || "1",
+    "WARRANTY_MAX_ORDERS_PER_BUYER_WINDOW",
+  );
+  const buyerWindowMs = parsePositiveInteger(
+    env.WARRANTY_BUYER_WINDOW_SECONDS || "86400",
+    "WARRANTY_BUYER_WINDOW_SECONDS",
+  ) * 1000;
+
   return {
     allowedTargetServiceIds,
     baseUsdc: getAddress(env.BASE_USDC || BASE_USDC),
@@ -47,6 +56,8 @@ export function loadWarrantyPolicy(env = process.env) {
     maxTimeoutMs,
     defaultTimeoutMs,
     targetAcceptMs: parseSeconds(env.WARRANTY_TARGET_ACCEPT_SECONDS || "180", "WARRANTY_TARGET_ACCEPT_SECONDS") * 1000,
+    maxOrdersPerBuyerWindow,
+    buyerWindowMs,
     refundDryRun: String(env.WARRANTY_REFUND_DRY_RUN || "1") !== "0",
   };
 }
@@ -60,8 +71,12 @@ export function validateIncomingCoverage(order, policy) {
   }
   if (token !== policy.baseUsdc) return invalid("Warranty only covers payments made in Base USDC.");
 
-  const amountAtomic = parseUsdcAtomic(order.price);
+  const reportedPriceAtomic = parseUsdcAtomic(order.price);
+  const feeAmountAtomic = parseUsdcAtomic(order.feeAmount);
+  const amountAtomic = feeAmountAtomic && feeAmountAtomic > 0n ? feeAmountAtomic : reportedPriceAtomic;
   if (amountAtomic === null || amountAtomic <= 0n) return invalid("Warranty order price must be a positive Base USDC amount.");
+  const fundAmountAtomic = parseUsdcAtomic(order.fundAmount) || 0n;
+  if (fundAmountAtomic > 0n) return invalid("Warranty does not accept incoming fund-transfer orders.");
   if (amountAtomic > policy.coverageCapAtomic) {
     return invalid(`Warranty coverage is capped at ${policy.coverageCapAtomic} atomic USDC per order.`);
   }
@@ -121,6 +136,12 @@ function parseUsdcConfig(value, name) {
 function parseSeconds(value, name) {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0) throw new Error(`${name} must be a positive integer number of seconds.`);
+  return parsed;
+}
+
+function parsePositiveInteger(value, name) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) throw new Error(`${name} must be a positive integer.`);
   return parsed;
 }
 

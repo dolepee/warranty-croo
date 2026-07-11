@@ -1,20 +1,19 @@
 import { DeliverableType, OrderStatus } from "@croo-network/sdk";
 import { sleep } from "./config.mjs";
+import { CROO_ORDER_ROLE } from "./croo-contract.mjs";
 
-const DEFAULT_POLL_MS = Number(process.env.WARRANTY_POLL_MS || "5000");
-
-export async function waitForOrderByNegotiation(client, negotiationId, role = "buyer", timeoutMs = 120_000) {
+export async function waitForOrderByNegotiation(client, negotiationId, role = CROO_ORDER_ROLE.requester, timeoutMs = 120_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const orders = await client.listOrders({ role, page: 1, pageSize: 50 });
     const match = orders.find((order) => order.negotiationId === negotiationId);
     if (match) return match;
-    await sleep(DEFAULT_POLL_MS);
+    await sleep(pollMs());
   }
   throw new Error(`Timed out waiting for order from negotiation ${negotiationId}`);
 }
 
-export async function waitForCreatedOrderByNegotiation(client, negotiationId, role = "buyer", timeoutMs = 120_000) {
+export async function waitForCreatedOrderByNegotiation(client, negotiationId, role = CROO_ORDER_ROLE.requester, timeoutMs = 120_000) {
   const deadline = Date.now() + timeoutMs;
   let lastStatus = "missing";
   while (Date.now() < deadline) {
@@ -31,7 +30,7 @@ export async function waitForCreatedOrderByNegotiation(client, negotiationId, ro
         throw new Error(`Order from negotiation ${negotiationId} reached ${match.status}: ${match.rejectReason || ""}`);
       }
     }
-    await sleep(DEFAULT_POLL_MS);
+    await sleep(pollMs());
   }
   throw new Error(`Timed out waiting for created order from negotiation ${negotiationId}; lastStatus=${lastStatus}`);
 }
@@ -39,9 +38,9 @@ export async function waitForCreatedOrderByNegotiation(client, negotiationId, ro
 export async function waitForPaidProviderOrder(client, timeoutMs = 120_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const paid = await client.listOrders({ role: "provider", status: OrderStatus.Paid, page: 1, pageSize: 50 });
+    const paid = await client.listOrders({ role: CROO_ORDER_ROLE.provider, status: OrderStatus.Paid, page: 1, pageSize: 50 });
     if (paid.length) return paid[0];
-    await sleep(DEFAULT_POLL_MS);
+    await sleep(pollMs());
   }
   throw new Error("Timed out waiting for a paid provider order");
 }
@@ -61,7 +60,7 @@ export async function waitForTerminalOrder(client, orderId, timeoutMs) {
     if (order.status === OrderStatus.DeliverFailed || order.status === OrderStatus.PayFailed || order.status === OrderStatus.CreateFailed) {
       return order;
     }
-    await sleep(DEFAULT_POLL_MS);
+    await sleep(pollMs());
   }
   return await client.getOrder(orderId);
 }
@@ -84,4 +83,9 @@ function hasContent(value) {
   if (typeof value !== "string") return false;
   const trimmed = value.trim();
   return Boolean(trimmed && trimmed !== "[]" && trimmed !== "{}" && trimmed !== "null");
+}
+
+function pollMs() {
+  const value = Number(process.env.WARRANTY_POLL_MS || "5000");
+  return Number.isFinite(value) && value >= 0 ? value : 5000;
 }

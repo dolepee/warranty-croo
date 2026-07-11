@@ -29,7 +29,55 @@ export function stubClient() {
 }
 
 export function clientFromKey(sdkKey) {
-  return new AgentClient(crooConfig(), sdkKey);
+  return createReliableClient(new AgentClient(crooConfig(), sdkKey));
+}
+
+export function createReliableClient(client, env = process.env) {
+  const readTimeoutMs = timeoutFromSeconds(env.WARRANTY_CROO_READ_TIMEOUT_SECONDS || "30", "WARRANTY_CROO_READ_TIMEOUT_SECONDS");
+  const writeTimeoutMs = timeoutFromSeconds(env.WARRANTY_CROO_WRITE_TIMEOUT_SECONDS || "120", "WARRANTY_CROO_WRITE_TIMEOUT_SECONDS");
+  const writeMethods = new Set([
+    "acceptNegotiation",
+    "acceptNegotiationWithFundAddress",
+    "rejectNegotiation",
+    "negotiateOrder",
+    "payOrder",
+    "deliverOrder",
+    "rejectOrder",
+    "uploadFile",
+  ]);
+  const wrapped = new Map();
+
+  return new Proxy(client, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== "function") return value;
+      if (wrapped.has(property)) return wrapped.get(property);
+      const timeoutMs = writeMethods.has(property) ? writeTimeoutMs : readTimeoutMs;
+      const method = (...args) => withTimeout(
+        () => value.apply(target, args),
+        `CROO ${String(property)}`,
+        timeoutMs,
+      );
+      wrapped.set(property, method);
+      return method;
+    },
+  });
+}
+
+export async function withTimeout(operation, label, timeoutMs) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(`${label} timed out after ${timeoutMs}ms`);
+      error.code = "CROO_TIMEOUT";
+      reject(error);
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([Promise.resolve().then(operation), timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export function requiredEnv(name, purpose) {
@@ -80,6 +128,14 @@ function quietLogger() {
     },
     debug() {},
   };
+}
+
+function timeoutFromSeconds(value, name) {
+  const seconds = Number(value);
+  if (!Number.isInteger(seconds) || seconds < 5 || seconds > 300) {
+    throw new Error(`${name} must be an integer between 5 and 300 seconds.`);
+  }
+  return seconds * 1000;
 }
 
 function loadDotEnv(path) {

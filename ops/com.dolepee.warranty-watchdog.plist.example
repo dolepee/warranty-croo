@@ -3,12 +3,12 @@
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.dolepee.warranty-provider</string>
+  <string>com.dolepee.warranty-watchdog</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/zsh</string>
     <string>-lc</string>
-    <string>cd /ABSOLUTE/PATH/TO/warranty-spike-run &amp;&amp; /usr/bin/env WARRANTY_WAIT_MS=86400000 /usr/bin/caffeinate -i node src/warranty-worker.mjs</string>
+    <string>cd /ABSOLUTE/PATH/TO/warranty-spike-run &amp;&amp; node src/watchdog.mjs</string>
   </array>
   <key>WorkingDirectory</key>
   <string>/ABSOLUTE/PATH/TO/warranty-spike-run</string>
@@ -17,13 +17,11 @@
     <key>PATH</key>
     <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
+  <key>StartInterval</key>
+  <integer>60</integer>
   <key>StandardOutPath</key>
-  <string>/ABSOLUTE/PATH/TO/warranty-spike-run/logs/warranty-provider.log</string>
+  <string>/ABSOLUTE/PATH/TO/warranty-spike-run/logs/warranty-watchdog.log</string>
   <key>StandardErrorPath</key>
-  <string>/ABSOLUTE/PATH/TO/warranty-spike-run/logs/warranty-provider.err.log</string>
+  <string>/ABSOLUTE/PATH/TO/warranty-spike-run/logs/warranty-watchdog.err.log</string>
 </dict>
 </plist>

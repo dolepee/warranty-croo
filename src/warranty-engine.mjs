@@ -1,5 +1,6 @@
 import { OrderStatus } from "@croo-network/sdk";
 import { parseRequirements, sleep } from "./config.mjs";
+import { CROO_NEGOTIATION_ROLE, CROO_ORDER_ROLE } from "./croo-contract.mjs";
 import { deliverJson, hasValidDelivery, waitForCreatedOrderByNegotiation, waitForTerminalOrder } from "./orders.mjs";
 import { getReserveBalance, refundBuyer } from "./refund.mjs";
 import { validateIncomingCoverage, validateTargetOrder } from "./warranty-policy.mjs";
@@ -24,13 +25,23 @@ export async function processWarrantyOrder({
   let record = await state.load(incomingOrderId);
   let incoming = await client.getOrder(incomingOrderId);
 
-  if (record && isJournalTerminal(record.stage)) return record;
+  if (record && isJournalTerminal(record.stage)) {
+    if (incomingMatchesOutcome(incoming, record.stage)) return record;
+    record = await state.update(incomingOrderId, {
+      stage: "INCOMING_DELIVERY_SUBMITTED",
+      pendingOutcome: record.stage,
+    });
+  }
   if (isIncomingComplete(incoming)) {
     if (!record) return { incomingOrderId, stage: "ALREADY_COMPLETED" };
-    const stage = (record.refundResult || record.stage === "REFUND_CONFIRMED") ? "REFUNDED" : "FULFILLED";
+    const stage = outcomeFromRecord(record);
     return state.update(incomingOrderId, { stage, recoveredFromIncomingCompletion: true });
   }
-  if (incoming.status !== OrderStatus.Paid) {
+  if ([OrderStatus.Rejected, OrderStatus.Expired].includes(incoming.status)) {
+    if (!record) return { incomingOrderId, stage: "ALREADY_REJECTED" };
+    return state.update(incomingOrderId, { stage: "REJECTED", incomingTerminalStatus: incoming.status });
+  }
+  if (incoming.status !== OrderStatus.Paid && !(record && isIncomingResumable(incoming.status))) {
     throw new Error(`incoming order ${incomingOrderId} is not paid, status=${incoming.status}`);
   }
 
@@ -40,6 +51,21 @@ export async function processWarrantyOrder({
 
     const coverage = validateIncomingCoverage(incoming, policy);
     if (!coverage.ok) return rejectAndRecord({ client, incoming, reason: coverage.reason, state, logger });
+
+    const recentBuyerOrders = await state.recentBuyerOrderCount(
+      incoming.requesterWalletAddress,
+      policy.buyerWindowMs,
+      incomingOrderId,
+    );
+    if (recentBuyerOrders >= policy.maxOrdersPerBuyerWindow) {
+      return rejectAndRecord({
+        client,
+        incoming,
+        reason: `Warranty buyer limit reached: ${policy.maxOrdersPerBuyerWindow} covered order(s) per ${policy.buyerWindowMs / 1000} seconds.`,
+        state,
+        logger,
+      });
+    }
 
     const otherLiabilities = await state.activeLiabilityAtomic(incomingOrderId);
     if (!policy.refundDryRun) {
@@ -73,7 +99,7 @@ export async function processWarrantyOrder({
     return rejectAndRecord({ client, incoming, reason: `target service is not allowlisted: ${targetServiceId}`, state, logger });
   }
 
-  record = await ensureTargetNegotiation({ client, incoming, record, state, targetServiceId, logger });
+  record = await ensureTargetNegotiation({ client, incoming, record, state, policy, targetServiceId, logger });
   try {
     record = await ensureTargetOrder({ client, incoming, record, state, policy, logger });
   } catch (error) {
@@ -109,12 +135,19 @@ export async function processWarrantyOrder({
     return rejectAndRecord({ client, incoming, reason: targetCheck.reason, state, logger, record });
   }
 
-  record = await ensureTargetPaid({ client, incoming, record, state, logger });
-  const terminal = await waitForTerminalOrder(client, record.targetOrderId, request.timeoutMs);
-  record = await state.update(incomingOrderId, { targetStatus: terminal.status, stage: "TARGET_TERMINAL" });
+  record = await ensureTargetPaid({ client, incoming, record, state, timeoutMs: request.timeoutMs, logger });
+  const terminal = await waitForTerminalOrder(client, record.targetOrderId, remainingMs(record.targetDeadlineAt));
+  const targetCompletedAt = targetCompletionTimestamp(terminal);
+  const targetOnTime = targetCompletedAt !== null && targetCompletedAt <= Date.parse(record.targetDeadlineAt);
+  record = await state.update(incomingOrderId, {
+    targetStatus: terminal.status,
+    targetCompletedAt: targetCompletedAt === null ? null : new Date(targetCompletedAt).toISOString(),
+    targetOnTime,
+    stage: "TARGET_TERMINAL",
+  });
 
   let delivery = null;
-  if (isDeliveryStatus(terminal.status)) delivery = await client.getDelivery(record.targetOrderId);
+  if (isDeliveryStatus(terminal.status) && targetOnTime) delivery = await client.getDelivery(record.targetOrderId);
   if (hasValidDelivery(delivery)) {
     const payload = {
       warranty: "fulfilled",
@@ -137,7 +170,7 @@ export async function processWarrantyOrder({
     amount: record.coverageAmountAtomic,
     token: record.paymentToken,
     orderId: incomingOrderId,
-    reason: `target ${record.targetOrderId} status=${terminal.status} delivery_valid=false`,
+    reason: `target ${record.targetOrderId} status=${terminal.status} on_time=${targetOnTime} delivery_valid=false`,
     preparedTransaction: record.refundPrepared || null,
     onPrepared: async (prepared) => {
       record = await state.update(incomingOrderId, { stage: "REFUND_PREPARED", refundPrepared: prepared });
@@ -154,6 +187,9 @@ export async function processWarrantyOrder({
     targetServiceId,
     targetPayTxHash: record.targetPayTxHash,
     targetStatus: terminal.status,
+    targetCompletedAt: record.targetCompletedAt,
+    targetDeadlineAt: record.targetDeadlineAt,
+    targetOnTime,
     refund: refundResult,
   };
   const delivered = await deliverIncomingOnce({ client, incomingOrderId, payload, state, stage: "REFUNDED" });
@@ -171,7 +207,7 @@ async function readAndValidateRequest(client, incoming, policy) {
   });
 }
 
-async function ensureTargetNegotiation({ client, incoming, record, state, targetServiceId, logger }) {
+async function ensureTargetNegotiation({ client, incoming, record, state, policy, targetServiceId, logger }) {
   if (record.targetNegotiationId) return record;
   record = await state.update(incoming.orderId, { stage: "TARGET_NEGOTIATION_PENDING", targetServiceId });
   const existing = await findNegotiationForIncoming(client, incoming.orderId);
@@ -184,10 +220,13 @@ async function ensureTargetNegotiation({ client, incoming, record, state, target
     }),
   });
   logger.log(`${existing ? "recovered" : "created"} target negotiation ${negotiation.negotiationId}`);
+  const targetNegotiatedAt = validTimestamp(negotiation.createdTime) || new Date().toISOString();
   return state.update(incoming.orderId, {
     stage: "TARGET_NEGOTIATED",
     targetNegotiationId: negotiation.negotiationId,
     targetServiceId,
+    targetNegotiatedAt,
+    targetAcceptDeadlineAt: new Date(Date.parse(targetNegotiatedAt) + policy.targetAcceptMs).toISOString(),
   });
 }
 
@@ -198,15 +237,19 @@ async function ensureTargetOrder({ client, incoming, record, state, policy, logg
   order ||= await waitForCreatedOrderByNegotiation(
     client,
     record.targetNegotiationId,
-    "buyer",
-    policy.targetAcceptMs,
+    CROO_ORDER_ROLE.requester,
+    remainingMs(record.targetAcceptDeadlineAt, policy.targetAcceptMs),
   );
   logger.log(`target order ${order.orderId} status=${order.status}`);
   return state.update(incoming.orderId, { stage: "TARGET_ORDER_CREATED", targetOrderId: order.orderId });
 }
 
-async function ensureTargetPaid({ client, incoming, record, state, logger }) {
-  if (record.targetPayTxHash) return record;
+async function ensureTargetPaid({ client, incoming, record, state, timeoutMs, logger }) {
+  if (record.targetPayTxHash && record.targetDeadlineAt) return record;
+  if (record.targetPayTxHash) {
+    const recovered = await client.getOrder(record.targetOrderId);
+    return saveTargetPaymentTiming({ incoming, record, state, target: recovered, txHash: record.targetPayTxHash, timeoutMs });
+  }
   record = await state.update(incoming.orderId, { stage: "TARGET_PAYMENT_PENDING" });
   let target = await client.getOrder(record.targetOrderId);
   if (target.status === OrderStatus.Paying) target = await waitForPaymentResolution(client, target.orderId);
@@ -231,24 +274,75 @@ async function ensureTargetPaid({ client, incoming, record, state, logger }) {
   }
   if (!txHash) throw new Error(`target order ${target.orderId} appears paid but has no payment transaction hash`);
   logger.log(`target paid ${txHash}`);
-  return state.update(incoming.orderId, { stage: "TARGET_PAID", targetPayTxHash: txHash });
+  target = await client.getOrder(target.orderId);
+  return saveTargetPaymentTiming({ incoming, record, state, target, txHash, timeoutMs });
+}
+
+async function saveTargetPaymentTiming({ incoming, record, state, target, txHash, timeoutMs }) {
+  const targetPaidAt = validTimestamp(target.paidAt) || validTimestamp(record.targetPaidAt) || new Date().toISOString();
+  return state.update(incoming.orderId, {
+    stage: "TARGET_PAID",
+    targetPayTxHash: txHash,
+    targetPaidAt,
+    targetDeadlineAt: new Date(Date.parse(targetPaidAt) + timeoutMs).toISOString(),
+  });
 }
 
 async function deliverIncomingOnce({ client, incomingOrderId, payload, state, stage }) {
   let current = await client.getOrder(incomingOrderId);
-  if (current.status === OrderStatus.Delivering) current = await waitForIncomingCompletion(client, incomingOrderId);
   if (isIncomingComplete(current)) {
     return state.update(incomingOrderId, { stage, incomingDeliverTxHash: current.deliverTxHash || null });
   }
-  await state.update(incomingOrderId, { stage: "INCOMING_DELIVERY_PENDING", pendingOutcome: stage });
-  const result = await deliverJson(client, incomingOrderId, payload);
-  return state.update(incomingOrderId, { stage, incomingDeliverTxHash: result.txHash });
+  if ([OrderStatus.Rejected, OrderStatus.Expired].includes(current.status)) {
+    return state.update(incomingOrderId, { stage: "REJECTED", incomingTerminalStatus: current.status });
+  }
+
+  let record = await state.load(incomingOrderId);
+  let deliverTxHash = current.deliverTxHash || record?.incomingDeliverTxHash || null;
+  if (current.status === OrderStatus.DeliverFailed) {
+    deliverTxHash = null;
+    record = await state.update(incomingOrderId, {
+      stage: "INCOMING_DELIVERY_PENDING",
+      pendingOutcome: stage,
+      incomingDeliverTxHash: null,
+      previousFailedDeliverTxHash: current.deliverTxHash || record?.incomingDeliverTxHash || null,
+    });
+  }
+  if (!deliverTxHash && !isIncomingDeliveryPending(current.status)) {
+    await state.update(incomingOrderId, { stage: "INCOMING_DELIVERY_PENDING", pendingOutcome: stage });
+    const result = await deliverJson(client, incomingOrderId, payload);
+    deliverTxHash = result.txHash;
+    record = await state.update(incomingOrderId, {
+      stage: "INCOMING_DELIVERY_SUBMITTED",
+      pendingOutcome: stage,
+      incomingDeliverTxHash: deliverTxHash,
+    });
+  } else if (deliverTxHash) {
+    record = await state.update(incomingOrderId, {
+      stage: "INCOMING_DELIVERY_SUBMITTED",
+      pendingOutcome: stage,
+      incomingDeliverTxHash: deliverTxHash,
+    });
+  }
+
+  current = await waitForIncomingCompletion(client, incomingOrderId);
+  if (isIncomingComplete(current)) {
+    return state.update(incomingOrderId, {
+      stage,
+      incomingDeliverTxHash: current.deliverTxHash || deliverTxHash,
+      incomingCompletedAt: current.updatedTime || current.deliveredAt || new Date().toISOString(),
+    });
+  }
+  if ([OrderStatus.Rejected, OrderStatus.Expired].includes(current.status)) {
+    return state.update(incomingOrderId, { stage: "REJECTED", incomingTerminalStatus: current.status });
+  }
+  throw new Error(`incoming delivery ${incomingOrderId} is not final, status=${current.status}`);
 }
 
-async function waitForIncomingCompletion(client, orderId, timeoutMs = 120_000) {
+async function waitForIncomingCompletion(client, orderId, timeoutMs = 180_000) {
   const deadline = Date.now() + timeoutMs;
   let order = await client.getOrder(orderId);
-  while (order.status === OrderStatus.Delivering && Date.now() < deadline) {
+  while (isIncomingDeliveryPending(order.status) && Date.now() < deadline) {
     await sleep(2_000);
     order = await client.getOrder(orderId);
   }
@@ -286,13 +380,27 @@ async function waitForRejectedIncoming(client, orderId, timeoutMs = 120_000) {
 }
 
 async function findNegotiationForIncoming(client, incomingOrderId) {
-  const negotiations = await client.listNegotiations({ role: "requester", page: 1, pageSize: 100 });
-  return negotiations.find((negotiation) => parseMetadata(negotiation.metadata)?.warrantyIncomingOrderId === incomingOrderId) || null;
+  for (let page = 1; page <= 10; page += 1) {
+    const negotiations = await client.listNegotiations({
+      role: CROO_NEGOTIATION_ROLE.requester,
+      page,
+      pageSize: 50,
+    });
+    const match = negotiations.find((negotiation) => parseMetadata(negotiation.metadata)?.warrantyIncomingOrderId === incomingOrderId);
+    if (match) return match;
+    if (negotiations.length < 50) return null;
+  }
+  return null;
 }
 
 async function findOrderForNegotiation(client, negotiationId) {
-  const orders = await client.listOrders({ role: "buyer", page: 1, pageSize: 100 });
-  return orders.find((order) => order.negotiationId === negotiationId) || null;
+  for (let page = 1; page <= 10; page += 1) {
+    const orders = await client.listOrders({ role: CROO_ORDER_ROLE.requester, page, pageSize: 50 });
+    const match = orders.find((order) => order.negotiationId === negotiationId);
+    if (match) return match;
+    if (orders.length < 50) return null;
+  }
+  return null;
 }
 
 async function waitForPaymentResolution(client, orderId, timeoutMs = 120_000) {
@@ -314,7 +422,44 @@ function parseMetadata(value) {
 }
 
 function isIncomingComplete(order) {
-  return order.status === OrderStatus.Completed || order.status === "delivered" || Boolean(order.deliverTxHash);
+  return order.status === OrderStatus.Completed || order.status === "delivered";
+}
+
+function isIncomingDeliveryPending(status) {
+  return status === OrderStatus.Delivering || status === "evaluating";
+}
+
+function isIncomingResumable(status) {
+  return isIncomingDeliveryPending(status) || status === OrderStatus.DeliverFailed;
+}
+
+function incomingMatchesOutcome(incoming, stage) {
+  if (stage === "REJECTED") return [OrderStatus.Rejected, OrderStatus.Expired].includes(incoming.status);
+  return isIncomingComplete(incoming);
+}
+
+function outcomeFromRecord(record) {
+  if (record.pendingOutcome === "REFUNDED" || record.refundResult || record.stage === "REFUND_CONFIRMED") return "REFUNDED";
+  if (record.pendingOutcome === "FULFILLED") return "FULFILLED";
+  if (record.stage === "REFUNDED") return "REFUNDED";
+  return "FULFILLED";
+}
+
+function remainingMs(deadlineAt, fallbackMs = 0) {
+  const deadline = Date.parse(deadlineAt || "");
+  if (!Number.isFinite(deadline)) return fallbackMs;
+  return Math.max(0, deadline - Date.now());
+}
+
+function validTimestamp(value) {
+  const timestamp = Date.parse(value || "");
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
+}
+
+function targetCompletionTimestamp(order) {
+  if (!isDeliveryStatus(order.status)) return null;
+  const explicit = Date.parse(order.deliveredAt || order.updatedTime || "");
+  return Number.isFinite(explicit) ? explicit : Date.now();
 }
 
 function isDeliveryStatus(status) {

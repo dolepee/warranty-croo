@@ -20,6 +20,15 @@ const policy = loadWarrantyPolicy({
 });
 assert.equal(validateIncomingCoverage({ paymentToken: usdc, price: "500000" }, policy).ok, true);
 assert.equal(validateIncomingCoverage({ paymentToken: usdc, price: "500001" }, policy).ok, false);
+const realIncomingPayload = validateIncomingCoverage({
+  paymentToken: usdc,
+  price: "",
+  feeAmount: "80000",
+  fundAmount: "0",
+}, policy);
+assert.equal(realIncomingPayload.ok, true);
+assert.equal(realIncomingPayload.amountAtomic, 80000n);
+assert.equal(validateIncomingCoverage({ paymentToken: usdc, feeAmount: "80000", fundAmount: "1" }, policy).ok, false);
 assert.equal(
   validateIncomingCoverage({ paymentToken: "0x4200000000000000000000000000000000000006", price: "1000" }, policy).ok,
   false,

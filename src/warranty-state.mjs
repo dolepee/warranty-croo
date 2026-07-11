@@ -85,6 +85,18 @@ export class WarrantyStateStore {
     }, 0n);
   }
 
+  async recentBuyerOrderCount(buyerWallet, windowMs, excludeOrderId = null, now = Date.now()) {
+    const normalized = String(buyerWallet || "").toLowerCase();
+    if (!normalized) return 0;
+    const cutoff = now - windowMs;
+    return (await this.list()).filter((record) => {
+      if (record.incomingOrderId === excludeOrderId) return false;
+      if (String(record.buyerWallet || "").toLowerCase() !== normalized) return false;
+      const createdAt = Date.parse(record.createdAt || "");
+      return Number.isFinite(createdAt) && createdAt >= cutoff;
+    }).length;
+  }
+
   #orderPath(orderId) {
     if (!/^[A-Za-z0-9_-]+$/.test(String(orderId))) throw new Error(`unsafe order id: ${orderId}`);
     return path.join(this.ordersDir, `${orderId}.json`);

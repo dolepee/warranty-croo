@@ -32,6 +32,37 @@ async function targetPaymentRecovery() {
     const result = await processWarrantyOrder(runtimeOptions(client, state));
     assert.equal(result.stage, "FULFILLED");
     assert.equal(client.payCalls, 1, "restart must reconcile the paid target instead of paying again");
+    assert.equal(Date.parse(result.targetDeadlineAt) - Date.parse(result.targetPaidAt), 60_000);
+  });
+}
+
+async function targetNegotiationRecovery() {
+  await withRuntime("negotiation", async ({ state, client }) => {
+    const fault = failOneUpdate(state, (patch) => Boolean(patch.targetNegotiationId));
+    await assert.rejects(
+      processWarrantyOrder(runtimeOptions(client, fault)),
+      /simulated journal crash/,
+    );
+    assert.equal(client.negotiateCalls, 1);
+
+    const result = await processWarrantyOrder(runtimeOptions(client, state));
+    assert.equal(result.stage, "FULFILLED");
+    assert.equal(client.negotiateCalls, 1, "restart must recover the metadata-linked target negotiation");
+  });
+}
+
+async function targetOrderRecovery() {
+  await withRuntime("target-order", async ({ state, client }) => {
+    const fault = failOneUpdate(state, (patch) => patch.stage === "TARGET_ORDER_CREATED");
+    await assert.rejects(
+      processWarrantyOrder(runtimeOptions(client, fault)),
+      /simulated journal crash/,
+    );
+
+    const result = await processWarrantyOrder(runtimeOptions(client, state));
+    assert.equal(result.stage, "FULFILLED");
+    assert.equal(client.negotiateCalls, 1, "restart must recover the already-created target order");
+    assert.equal(client.payCalls, 1);
   });
 }
 
@@ -47,6 +78,54 @@ async function incomingDeliveryRecovery() {
     const result = await processWarrantyOrder(runtimeOptions(client, state));
     assert.equal(result.stage, "FULFILLED");
     assert.equal(client.deliverCalls, 1, "restart must detect the completed incoming order instead of delivering again");
+  });
+}
+
+async function incomingSubmissionRecovery() {
+  await withRuntime("delivery-submission", async ({ state, client }) => {
+    const fault = failOneUpdate(state, (patch) => patch.stage === "INCOMING_DELIVERY_SUBMITTED");
+    await assert.rejects(
+      processWarrantyOrder(runtimeOptions(client, fault)),
+      /simulated journal crash/,
+    );
+    assert.equal(client.deliverCalls, 1);
+
+    const result = await processWarrantyOrder(runtimeOptions(client, state));
+    assert.equal(result.stage, "FULFILLED");
+    assert.equal(client.deliverCalls, 1, "restart must reconcile the submitted incoming delivery");
+  });
+}
+
+async function incomingEvaluationWaitsForCompletion() {
+  await withRuntime("evaluation", async ({ state, client }) => {
+    const previousPoll = process.env.WARRANTY_POLL_MS;
+    process.env.WARRANTY_POLL_MS = "1";
+    client.incomingLifecycle = ["delivering", "evaluating", "completed"];
+    try {
+      const result = await processWarrantyOrder(runtimeOptions(client, state));
+      assert.equal(result.stage, "FULFILLED");
+      assert.equal(client.deliverCalls, 1);
+      assert.ok(client.incomingReadsAfterDelivery >= 3, "Warranty must observe CROO completion after delivery submission");
+    } finally {
+      if (previousPoll === undefined) delete process.env.WARRANTY_POLL_MS;
+      else process.env.WARRANTY_POLL_MS = previousPoll;
+    }
+  });
+}
+
+async function incomingDeliveryFailureRetries() {
+  await withRuntime("delivery-failure", async ({ state, client }) => {
+    client.failedIncomingDeliveries = 1;
+    await assert.rejects(
+      processWarrantyOrder(runtimeOptions(client, state)),
+      /status=deliver_failed/,
+    );
+    assert.equal(client.deliverCalls, 1);
+
+    const result = await processWarrantyOrder(runtimeOptions(client, state));
+    assert.equal(result.stage, "FULFILLED");
+    assert.equal(client.deliverCalls, 2, "an explicit failed CROO delivery should retry without repaying the target");
+    assert.equal(client.payCalls, 1);
   });
 }
 
@@ -83,6 +162,41 @@ async function refundRecovery() {
     assert.equal(uniqueBroadcasts.size, 1, "restart must reuse the same signed refund transaction hash");
     assert.equal(observedPrepared[0], observedPrepared[1], "restart must rebroadcast the identical serialized refund transaction");
     assert.equal(client.payCalls, 1, "refund recovery must not repay the target order");
+  });
+}
+
+async function lateTargetRefunds() {
+  await withRuntime("late-target", async ({ state, client }) => {
+    client.targetDeliveredAtOffsetMs = 120_000;
+    const refund = async ({ amount, to, token }) => ({
+      dryRun: false,
+      txHash: `0x${"ef".repeat(32)}`,
+      amount,
+      to,
+      token,
+    });
+    const result = await processWarrantyOrder(runtimeOptions(client, state, refund));
+    assert.equal(result.stage, "REFUNDED");
+    assert.equal(result.targetOnTime, false);
+    assert.equal(client.payCalls, 1);
+  });
+}
+
+async function buyerRateLimitRejectsBeforeTargetPayment() {
+  await withRuntime("buyer-rate-limit", async ({ state, client }) => {
+    await state.save({
+      incomingOrderId: "prior-covered-order",
+      stage: "FULFILLED",
+      buyerWallet: client.incoming.requesterWalletAddress,
+      coverageAmountAtomic: "80000",
+      paymentToken: USDC,
+    });
+    const result = await processWarrantyOrder(runtimeOptions(client, state));
+    assert.equal(result.stage, "REJECTED");
+    assert.match(result.rejectionReason, /buyer limit reached/);
+    assert.equal(client.negotiateCalls, 0);
+    assert.equal(client.payCalls, 0);
+    assert.equal(client.rejectCalls, 1);
   });
 }
 
@@ -142,13 +256,24 @@ class FakeCROOClient {
     this.target = null;
     this.negotiation = null;
     this.payCalls = 0;
+    this.negotiateCalls = 0;
     this.deliverCalls = 0;
     this.rejectCalls = 0;
     this.targetOutcome = "completed";
+    this.incomingLifecycle = [];
+    this.incomingReadsAfterDelivery = 0;
+    this.failedIncomingDeliveries = 0;
+    this.targetDeliveredAtOffsetMs = 0;
   }
 
   async getOrder(orderId) {
-    if (orderId === this.incoming.orderId) return { ...this.incoming };
+    if (orderId === this.incoming.orderId) {
+      if (this.deliverCalls > 0 && this.incomingLifecycle.length) {
+        this.incoming.status = this.incomingLifecycle.shift();
+        this.incomingReadsAfterDelivery += 1;
+      }
+      return { ...this.incoming };
+    }
     if (this.target && orderId === this.target.orderId) return { ...this.target };
     throw new Error(`unknown order ${orderId}`);
   }
@@ -173,12 +298,14 @@ class FakeCROOClient {
   }
 
   async negotiateOrder({ serviceId, requirements, metadata }) {
+    this.negotiateCalls += 1;
     this.negotiation = {
       negotiationId: "target-negotiation",
       serviceId,
       requirements,
       metadata,
       status: "accepted",
+      createdTime: new Date().toISOString(),
     };
     this.target = {
       orderId: "target-1",
@@ -199,6 +326,8 @@ class FakeCROOClient {
   async payOrder() {
     this.payCalls += 1;
     this.target.payTxHash = `0x${"12".repeat(32)}`;
+    this.target.paidAt = new Date().toISOString();
+    this.target.deliveredAt = new Date(Date.now() + this.targetDeliveredAtOffsetMs).toISOString();
     this.target.status = this.targetOutcome;
     return { order: { ...this.target }, txHash: this.target.payTxHash };
   }
@@ -214,8 +343,13 @@ class FakeCROOClient {
   async deliverOrder(orderId) {
     assert.equal(orderId, this.incoming.orderId);
     this.deliverCalls += 1;
-    this.incoming.status = "completed";
-    this.incoming.deliverTxHash = `0x${"34".repeat(32)}`;
+    this.incoming.deliverTxHash = `0x${this.deliverCalls.toString(16).padStart(64, "0")}`;
+    if (this.failedIncomingDeliveries > 0) {
+      this.failedIncomingDeliveries -= 1;
+      this.incoming.status = "deliver_failed";
+      return { txHash: this.incoming.deliverTxHash };
+    }
+    this.incoming.status = this.incomingLifecycle.length ? "delivering" : "completed";
     return { txHash: this.incoming.deliverTxHash };
   }
 
@@ -226,7 +360,14 @@ class FakeCROOClient {
   }
 }
 
+await targetNegotiationRecovery();
+await targetOrderRecovery();
 await targetPaymentRecovery();
 await incomingDeliveryRecovery();
+await incomingSubmissionRecovery();
+await incomingEvaluationWaitsForCompletion();
+await incomingDeliveryFailureRetries();
 await refundRecovery();
+await lateTargetRefunds();
+await buyerRateLimitRejectsBeforeTargetPayment();
 console.log("WARRANTY_RECOVERY_OK");
