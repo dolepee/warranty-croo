@@ -146,7 +146,7 @@ BABYYODA ran Warranty from a new external buyer wallet. Warranty paid GhostWrite
 
 ### Remi External Buyer Fulfillment
 
-Remi's Macro Intelligence agent ran Warranty from a fifth distinct buyer wallet. Warranty paid RateCard, returned its accepted pricing report before the SLA deadline, and then bought Remi's Gas Tracker in the reciprocal direction. The covered route and the separate A2A purchase both settled on Base.
+Remi's Macro Intelligence agent ran Warranty from a fourth independent external buyer wallet, bringing the clean ledger to five distinct wallets including Warranty's controlled proof buyer. Warranty paid RateCard, returned its accepted pricing report before the SLA deadline, and then bought Remi's Gas Tracker in the reciprocal direction. The covered route and the separate A2A purchase both settled on Base.
 
 | Step | Evidence |
 | --- | --- |
@@ -159,6 +159,17 @@ Remi's Macro Intelligence agent ran Warranty from a fifth distinct buyer wallet.
 | Reciprocal Gas Tracker order | `ba970332-b196-4b6e-ba3f-dcbfe989e3f2` |
 | Warranty paid Gas Tracker | `0x6206a9f60d282075f0f8589f103b5b8eeb084ab843b6be09556b9c8a146f26f8` |
 | Gas Tracker delivery | `0xa18fe5651dc321e610b9cc0d7861c31dbc6e4e0a8ed6bb08f155481b3a156722` |
+
+### CrooCred External Audit Interaction
+
+A fifth independent external wallet paid Warranty during a CrooCred audit of an earlier worker version. That run exposed a payload-routing defect, so it is retained as paid external interaction evidence but deliberately excluded from the fulfilled coverage ledger. The current worker validates the exact structured target before accepting or paying an order.
+
+| Step | Evidence |
+| --- | --- |
+| CrooCred buyer wallet | `0xa16F422c4F815Ee89A0bE3fdf3A56cD7A165a9C2` |
+| Incoming audit order | `b4ee9df2-fc1b-4b57-bf0f-835fc2b775a2` |
+| External audit payment tx | `0x2772338c83673126d617a8c5a85228472f7919ea2bcc49987bdc82c9359b04a7` |
+| Counted as successful fulfillment | `No` |
 
 ## Active Coverage Campaign
 
@@ -176,12 +187,12 @@ The public coverage ledger starts with the verified proof rows above:
 | Fulfilled | `6` |
 | Refunded | `2` |
 | Unique target services | `5` |
-| Unique buyer wallets | `5` |
+| Unique buyer wallets | `5` (`4 external + 1 controlled`) |
 | Target payments | `0.43 USDC` |
 | Reserve refunds | `0.08 USDC` |
 | Native buyer refunds | `0.08 USDC` |
 
-The competition expansion target of five distinct buyer wallets is now met in the clean public ledger. New rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
+The clean public ledger contains four independent external buyer wallets plus Warranty's controlled proof buyer. Five independent external wallets interacted overall when the separate CrooCred paid audit is included; that audit is not counted as a successful route. New clean rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
 
 ## Public Wallets
 
@@ -316,7 +327,7 @@ What is proven now:
 | Warranty sends a real Base USDC refund | Live proof |
 | Coverage ledger and public board | Implemented |
 | At least three supported target services covered | Live proof |
-| Five distinct buyer wallets | Live proof |
+| Five distinct buyer wallets (four external plus one controlled) | Live proof |
 | Polling fallback, runtime heartbeat, and stalled-worker restart | Implemented and canary-tested |
 
 ## Roadmap
