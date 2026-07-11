@@ -163,19 +163,27 @@ function renderCoveredServices() {
 }
 
 async function updateReserve(snapshot) {
-  const balance = document.getElementById("reserve-balance");
-  const source = document.getElementById("reserve-source");
-  if (!balance || !source) return;
+  const balances = document.querySelectorAll("[data-reserve-balance]");
+  const sources = document.querySelectorAll("[data-reserve-source]");
+  if (!balances.length) return;
 
   if (snapshot?.balanceUSDC) {
-    balance.textContent = `${snapshot.balanceUSDC} USDC`;
-    source.textContent = "proof snapshot";
+    balances.forEach((element) => {
+      element.textContent = `${snapshot.balanceUSDC} USDC`;
+    });
+    sources.forEach((element) => {
+      element.textContent = "proof snapshot";
+    });
   }
 
   try {
     const atomic = await readReserveBalance(snapshot?.wallet);
-    balance.textContent = `${formatUsdc(atomic)} USDC`;
-    source.textContent = "live Base balance";
+    balances.forEach((element) => {
+      element.textContent = `${formatUsdc(atomic)} USDC`;
+    });
+    sources.forEach((element) => {
+      element.textContent = "live Base balance";
+    });
   } catch (error) {
     console.warn(error);
   }

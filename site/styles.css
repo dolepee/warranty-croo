@@ -98,8 +98,7 @@ pre {
 }
 
 .header-inner {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
   width: min(100%, var(--content));
   min-height: 72px;
@@ -111,6 +110,7 @@ pre {
 .brand {
   display: inline-flex;
   align-items: center;
+  margin-right: auto;
   gap: 11px;
   color: var(--ink);
   font-weight: 850;
@@ -125,16 +125,41 @@ pre {
 .primary-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 30px;
+  justify-content: flex-end;
+  gap: 26px;
+  margin-left: auto;
 }
 
 .primary-nav a,
 .text-link {
+  position: relative;
   color: var(--ink-soft);
   font-size: 14px;
   font-weight: 720;
   text-decoration: none;
+}
+
+.primary-nav a {
+  display: inline-flex;
+  min-height: 72px;
+  align-items: center;
+}
+
+.primary-nav a::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--green-deep);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: right;
+}
+
+.primary-nav a:hover::after,
+.primary-nav a[aria-current="page"]::after {
+  transform: scaleX(1);
 }
 
 .primary-nav a:hover,
@@ -1206,7 +1231,7 @@ pre {
   }
 
   .header-inner {
-    grid-template-columns: 1fr auto;
+    display: flex;
   }
 
   .hero-layout,
