@@ -286,7 +286,7 @@ async function waitForRejectedIncoming(client, orderId, timeoutMs = 120_000) {
 }
 
 async function findNegotiationForIncoming(client, incomingOrderId) {
-  const negotiations = await client.listNegotiations({ role: "buyer", page: 1, pageSize: 100 });
+  const negotiations = await client.listNegotiations({ role: "requester", page: 1, pageSize: 100 });
   return negotiations.find((negotiation) => parseMetadata(negotiation.metadata)?.warrantyIncomingOrderId === incomingOrderId) || null;
 }
 

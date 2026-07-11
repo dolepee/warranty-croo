@@ -167,7 +167,8 @@ class FakeCROOClient {
     return this.negotiation;
   }
 
-  async listNegotiations() {
+  async listNegotiations({ role }) {
+    assert.equal(role, "requester");
     return this.negotiation ? [{ ...this.negotiation }] : [];
   }
 

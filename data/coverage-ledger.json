@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-09T11:05:00Z",
+  "updatedAt": "2026-07-11T06:51:00Z",
   "project": "Warranty",
   "network": {
     "name": "Base mainnet",
@@ -13,12 +13,12 @@
     "uniqueBuyerWallets": 5
   },
   "summary": {
-    "coveredOrders": 6,
-    "fulfilled": 4,
+    "coveredOrders": 7,
+    "fulfilled": 5,
     "refunded": 2,
-    "uniqueTargetAgents": 4,
-    "uniqueBuyerWallets": 3,
-    "targetPaidUSDC": "0.23",
+    "uniqueTargetAgents": 5,
+    "uniqueBuyerWallets": 4,
+    "targetPaidUSDC": "0.33",
     "reserveRefundedUSDC": "0.08",
     "nativeRefundedUSDC": "0.08",
     "targetRefundedUSDC": "0.05"
@@ -27,7 +27,7 @@
     "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
     "balanceUSDC": "0.921845",
     "balanceAtomic": "921845",
-    "checkedAt": "2026-07-09T11:05:00Z",
+    "checkedAt": "2026-07-11T06:51:00Z",
     "source": "Base USDC balanceOf"
   },
   "publicWallets": {
@@ -154,6 +154,29 @@
       "targetPaidUSDC": "0.10",
       "refundUSDC": "0",
       "note": "External buyer wallet paid Warranty with a text-wrapped JSON request. Warranty parsed the target service, paid RateCard, accepted a structured-schema delivery, and delivered the result back."
+    },
+    {
+      "id": "coverage-2026-07-11-babyyoda-external-ghostwriter-fulfilled",
+      "label": "BABYYODA external buyer fulfilled",
+      "scope": "external buyer expansion",
+      "buyerLabel": "BABYYODA / TraderScan",
+      "buyerWallet": "0xFcf10F5C58133356e33667F4C1c88b0789b0a883",
+      "targetAgent": "GhostWriter",
+      "targetServiceId": "4451398c-d9bc-422a-b6a7-73c218cb6f14",
+      "outcome": "fulfilled",
+      "incomingOrderId": "24d69edb-45a3-4b14-85e4-b24bb2e1d4af",
+      "targetOrderId": "066d0dcf-545e-44bf-be34-1069940ae4dc",
+      "buyerPaidWarrantyTx": "0xb5dc7c54ad66e224632ccfd5d083d8e973999f6ebc29bd5276ef3450f995635c",
+      "warrantyPaidTargetTx": "0x628cb00c271873ac41126b75737845a9cd606f9c9dc3ae5856d317dadc194ace",
+      "targetAttestationTx": "0x0b8f6e7f365492583d0042e2716af96b40161d4e5b5786004d5b32ffb65f2cbd",
+      "targetDeliveredTx": "0xb7a342c027b5e4025c6eca1563bd89a0cc98e264d7355fd4f03f2076fdce9be0",
+      "targetClearTx": "0x5853c0342960d170b6fe22b44a2af344c698af126b85ad7f939ea0dcbb6207d9",
+      "warrantyDeliveredTx": "0x18ad04b4a8a5b73e32c36932f9ced26ccfae2b884f9e9e13f6e7f9b9ce45d8a7",
+      "warrantyClearTx": "0xd9bbb6702d9654a23dd4b4dc0570f520d655eeeb30e67836544a874990f1b1c3",
+      "refundTx": null,
+      "targetPaidUSDC": "0.10",
+      "refundUSDC": "0",
+      "note": "BABYYODA paid Warranty from an external buyer wallet. Warranty routed to GhostWriter, which returned an accepted originality result and minted a Base NFT attestation before Warranty delivered the result back."
     }
   ],
   "candidateTargets": [

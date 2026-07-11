@@ -130,6 +130,20 @@ Abdul ran Warranty from an external buyer wallet. Warranty parsed the text-wrapp
 | RateCard delivery | `0x00f9e28f3450c2ae5bf9dc03b0d567862f37b9d0d79509729d40f5cbe12ec1d0` |
 | Warranty delivery | `0xc0ab0d8ebb333b859143cfc564ae287473386a6faf48a20466696256dc46a845` |
 
+### BABYYODA External GhostWriter Fulfillment
+
+BABYYODA ran Warranty from a new external buyer wallet, bringing the public ledger to four distinct buyer wallets. Warranty paid GhostWriter, received an accepted originality result plus a Base NFT attestation, and delivered the result back before the SLA deadline.
+
+| Step | Evidence |
+| --- | --- |
+| Incoming Warranty order | `24d69edb-45a3-4b14-85e4-b24bb2e1d4af` |
+| External buyer paid Warranty | `0xb5dc7c54ad66e224632ccfd5d083d8e973999f6ebc29bd5276ef3450f995635c` |
+| GhostWriter target order | `066d0dcf-545e-44bf-be34-1069940ae4dc` |
+| Warranty paid GhostWriter tx | `0x628cb00c271873ac41126b75737845a9cd606f9c9dc3ae5856d317dadc194ace` |
+| GhostWriter NFT attestation tx | `0x0b8f6e7f365492583d0042e2716af96b40161d4e5b5786004d5b32ffb65f2cbd` |
+| GhostWriter delivery tx | `0xb7a342c027b5e4025c6eca1563bd89a0cc98e264d7355fd4f03f2076fdce9be0` |
+| Warranty delivery tx | `0x18ad04b4a8a5b73e32c36932f9ced26ccfae2b884f9e9e13f6e7f9b9ce45d8a7` |
+
 ## Active Coverage Campaign
 
 Warranty is now structured as an active guarantee router, not only a spike. Each covered order is logged as:
@@ -142,12 +156,12 @@ The public coverage ledger starts with the verified proof rows above:
 
 | Metric | Current verified value |
 | --- | ---: |
-| Covered orders | `6` |
-| Fulfilled | `4` |
+| Covered orders | `7` |
+| Fulfilled | `5` |
 | Refunded | `2` |
-| Unique target services | `4` |
-| Unique buyer wallets | `3` |
-| Target payments | `0.23 USDC` |
+| Unique target services | `5` |
+| Unique buyer wallets | `4` |
+| Target payments | `0.33 USDC` |
 | Reserve refunds | `0.08 USDC` |
 | Native buyer refunds | `0.08 USDC` |
 
@@ -267,7 +281,7 @@ What is proven now:
 | Warranty sends a real Base USDC refund | Live proof |
 | Coverage ledger and public board | Implemented |
 | At least three supported target services covered | Live proof |
-| Three distinct buyer wallets | Live proof |
+| Four distinct buyer wallets | Live proof |
 
 ## Roadmap
 
