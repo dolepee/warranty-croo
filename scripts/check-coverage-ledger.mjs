@@ -47,13 +47,15 @@ for (const [index, row] of rows.entries()) {
 const summary = ledger.summary || {};
 const fulfilled = rows.filter((row) => row.outcome === "fulfilled").length;
 const refunded = rows.filter((row) => row.outcome === "refunded" || row.outcome === "native_refunded").length;
-const uniqueTargetAgents = new Set(rows.map((row) => row.targetServiceId)).size;
+const uniqueTargetAgents = new Set(rows.map((row) => row.targetAgent.trim().toLowerCase())).size;
+const uniqueTargetServices = new Set(rows.map((row) => row.targetServiceId)).size;
 const uniqueBuyerWallets = new Set(rows.map((row) => row.buyerWallet.toLowerCase())).size;
 
 checkSummary("coveredOrders", rows.length);
 checkSummary("fulfilled", fulfilled);
 checkSummary("refunded", refunded);
 checkSummary("uniqueTargetAgents", uniqueTargetAgents);
+checkSummary("uniqueTargetServices", uniqueTargetServices);
 checkSummary("uniqueBuyerWallets", uniqueBuyerWallets);
 
 if (errors.length) {
@@ -62,7 +64,7 @@ if (errors.length) {
 }
 
 console.log(
-  `COVERAGE_LEDGER_OK rows=${rows.length} fulfilled=${fulfilled} refunded=${refunded} targets=${uniqueTargetAgents} buyers=${uniqueBuyerWallets}`,
+  `COVERAGE_LEDGER_OK rows=${rows.length} fulfilled=${fulfilled} refunded=${refunded} agents=${uniqueTargetAgents} services=${uniqueTargetServices} buyers=${uniqueBuyerWallets}`,
 );
 
 function checkSummary(field, actual) {
