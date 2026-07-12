@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-11T17:28:00Z",
+  "updatedAt": "2026-07-12T09:14:10Z",
   "project": "Warranty",
   "network": {
     "name": "Base mainnet",
@@ -13,12 +13,12 @@
     "uniqueBuyerWallets": 5
   },
   "summary": {
-    "coveredOrders": 8,
-    "fulfilled": 6,
+    "coveredOrders": 9,
+    "fulfilled": 7,
     "refunded": 2,
-    "uniqueTargetAgents": 5,
-    "uniqueBuyerWallets": 5,
-    "targetPaidUSDC": "0.43",
+    "uniqueTargetAgents": 6,
+    "uniqueBuyerWallets": 6,
+    "targetPaidUSDC": "0.48",
     "reserveRefundedUSDC": "0.08",
     "nativeRefundedUSDC": "0.08",
     "targetRefundedUSDC": "0.05"
@@ -27,7 +27,7 @@
     "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
     "balanceUSDC": "0.921845",
     "balanceAtomic": "921845",
-    "checkedAt": "2026-07-11T06:51:00Z",
+    "checkedAt": "2026-07-12T09:14:10Z",
     "source": "Base USDC balanceOf"
   },
   "publicWallets": {
@@ -199,6 +199,28 @@
       "targetPaidUSDC": "0.10",
       "refundUSDC": "0",
       "note": "Remi's external buyer wallet paid Warranty. Warranty routed to RateCard, returned its accepted pricing report before the SLA deadline, and then completed a separate reciprocal Gas Tracker purchase from Remi's agent."
+    },
+    {
+      "id": "coverage-2026-07-12-madeel91-external-payguard-delivered",
+      "label": "madeel91 external buyer received PayGuard warning",
+      "scope": "external buyer expansion",
+      "buyerLabel": "madeel91 / PayGuard",
+      "buyerWallet": "0x74F14B09238151BA9a01B622693268934256a628",
+      "targetAgent": "PayGuard",
+      "targetServiceId": "04bd852a-4917-43fc-9a72-713f4e1b015c",
+      "outcome": "fulfilled",
+      "incomingOrderId": "54ba12a7-854e-4c85-8e36-b5cf46232235",
+      "targetOrderId": "23c74f7a-49e8-4421-86d3-5c0bea472d83",
+      "buyerPaidWarrantyTx": "0x7ff47b120b3ad1685e03ff1f89fffffb679771bf2f76f5b6f2d204864145576d",
+      "warrantyPaidTargetTx": "0x89faff85a395e3e8a014bd7c005e508ba06b6f9d6ef31dd476407a62e63f0562",
+      "targetDeliveredTx": "0xabc8f0393a78495c7bde35da78901cc0bab08a5f327eb2d0fe730e467036f420",
+      "targetClearTx": "0xef405b8790f8a6676e3795df5afc72a603fef58e8915c62ca5969ad06a58a7ae",
+      "warrantyDeliveredTx": "0x4179063ef6efc136c1c35da3d2a946dfcc008e494557c3c19ae6cad635354686",
+      "warrantyClearTx": "0x0ca19c26e232649ec896ccc60372d0356f392a746acb7666ca7fdd9dd2bcf3f8",
+      "refundTx": null,
+      "targetPaidUSDC": "0.05",
+      "refundUSDC": "0",
+      "note": "madeel91 paid Warranty from a fifth independent external buyer wallet. Warranty routed the supplied payload to PayGuard and returned PayGuard's accepted input-warning delivery before the SLA deadline. Two buyer-supplied hex fields contained whitespace, so this proves the paid delivery route, not a successful PayGuard risk scan."
     }
   ],
   "candidateTargets": [

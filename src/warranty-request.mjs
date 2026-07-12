@@ -83,7 +83,30 @@ function normalizeTargetRequirements(value) {
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return invalid("Warranty requires targetRequirements as a JSON object.");
   }
+  const malformedHexPath = findWhitespaceCorruptedHex(parsed);
+  if (malformedHexPath) {
+    return invalid(`targetRequirements.${malformedHexPath} looks like hex data but contains whitespace.`);
+  }
   return { ok: true, value: parsed };
+}
+
+function findWhitespaceCorruptedHex(value, path = "") {
+  if (typeof value === "string") {
+    return /^0x/i.test(value) && /\s/.test(value) ? path || "value" : null;
+  }
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const match = findWhitespaceCorruptedHex(value[index], `${path}[${index}]`);
+      if (match) return match;
+    }
+    return null;
+  }
+  if (!value || typeof value !== "object") return null;
+  for (const [key, nested] of Object.entries(value)) {
+    const match = findWhitespaceCorruptedHex(nested, path ? `${path}.${key}` : key);
+    if (match) return match;
+  }
+  return null;
 }
 
 function normalizeTimeoutMs(

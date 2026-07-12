@@ -45,7 +45,7 @@ Buyer requirements should use this shape:
 }
 ```
 
-Good targets are listed CROO services with clear, fast deliverables: reports, audits, data lookups, pricing recommendations, claim reviews, and verification tasks. New target services can be added to the allowlist before a covered run. `targetRequirements` must be a JSON object tailored to that target service; free-form text is rejected before acceptance.
+Good targets are listed CROO services with clear, fast deliverables: reports, audits, data lookups, pricing recommendations, claim reviews, and verification tasks. New target services can be added to the allowlist before a covered run. `targetRequirements` must be a JSON object tailored to that target service; free-form text and whitespace-corrupted hex values are rejected before acceptance.
 
 ## Live Proof
 
@@ -160,9 +160,22 @@ Remi's Macro Intelligence agent ran Warranty from a fourth independent external 
 | Warranty paid Gas Tracker | `0x6206a9f60d282075f0f8589f103b5b8eeb084ab843b6be09556b9c8a146f26f8` |
 | Gas Tracker delivery | `0xa18fe5651dc321e610b9cc0d7861c31dbc6e4e0a8ed6bb08f155481b3a156722` |
 
+### madeel91 External PayGuard Delivery
+
+madeel91 ran Warranty from a fifth independent external buyer wallet. Warranty paid PayGuard and returned its accepted structured delivery before the SLA deadline. The buyer-supplied payload contained whitespace inside two hex fields, so PayGuard correctly returned an `INCOMPLETE_INPUT` warning. This row proves the paid delivery route, not a successful PayGuard risk scan. The request parser now rejects whitespace-corrupted hex before acceptance.
+
+| Step | Evidence |
+| --- | --- |
+| Incoming Warranty order | `54ba12a7-854e-4c85-8e36-b5cf46232235` |
+| External buyer paid Warranty | `0x7ff47b120b3ad1685e03ff1f89fffffb679771bf2f76f5b6f2d204864145576d` |
+| PayGuard target order | `23c74f7a-49e8-4421-86d3-5c0bea472d83` |
+| Warranty paid PayGuard | `0x89faff85a395e3e8a014bd7c005e508ba06b6f9d6ef31dd476407a62e63f0562` |
+| PayGuard delivery | `0xabc8f0393a78495c7bde35da78901cc0bab08a5f327eb2d0fe730e467036f420` |
+| Warranty delivery | `0x4179063ef6efc136c1c35da3d2a946dfcc008e494557c3c19ae6cad635354686` |
+
 ### CrooCred External Audit Interaction
 
-A fifth independent external wallet paid Warranty during a CrooCred audit of an earlier worker version. That run exposed a payload-routing defect, so it is retained as paid external interaction evidence but deliberately excluded from the fulfilled coverage ledger. The current worker validates the exact structured target before accepting or paying an order.
+A sixth independent external wallet paid Warranty during a CrooCred audit of an earlier worker version. That run exposed a payload-routing defect, so it is retained as paid external interaction evidence but deliberately excluded from the fulfilled coverage ledger. The current worker validates the exact structured target before accepting or paying an order.
 
 | Step | Evidence |
 | --- | --- |
@@ -183,16 +196,16 @@ The public coverage ledger starts with the verified proof rows above:
 
 | Metric | Current verified value |
 | --- | ---: |
-| Covered orders | `8` |
-| Fulfilled | `6` |
+| Covered orders | `9` |
+| Fulfilled | `7` |
 | Refunded | `2` |
-| Unique target services | `5` |
-| Unique buyer wallets | `5` (`4 external + 1 controlled`) |
-| Target payments | `0.43 USDC` |
+| Unique target services | `6` across `5` target agents |
+| Unique buyer wallets | `6` (`5 external + 1 controlled`) |
+| Target payments | `0.48 USDC` |
 | Reserve refunds | `0.08 USDC` |
 | Native buyer refunds | `0.08 USDC` |
 
-The clean public ledger contains four independent external buyer wallets plus Warranty's controlled proof buyer. Five independent external wallets interacted overall when the separate CrooCred paid audit is included; that audit is not counted as a successful route. New clean rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
+The clean public ledger contains five independent external buyer wallets plus Warranty's controlled proof buyer. Six independent external wallets interacted overall when the separate CrooCred paid audit is included; that audit is not counted as a successful route. The madeel91 row is counted as delivered because PayGuard returned an accepted provider response, while its input-warning result remains labeled explicitly. New clean rows should be added to `data/coverage-ledger.json` as they run; the proof site mirrors the public summary in `site/proofs.json`.
 
 ## Public Wallets
 
@@ -327,7 +340,7 @@ What is proven now:
 | Warranty sends a real Base USDC refund | Live proof |
 | Coverage ledger and public board | Implemented |
 | At least three supported target services covered | Live proof |
-| Five distinct buyer wallets (four external plus one controlled) | Live proof |
+| Six distinct buyer wallets (five external plus one controlled) | Live proof |
 | Polling fallback, runtime heartbeat, and stalled-worker restart | Implemented and canary-tested |
 
 ## Roadmap

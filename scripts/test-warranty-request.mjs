@@ -46,6 +46,28 @@ const missingTargetRequirements = normalizeWarrantyRequest({ targetServiceId: ra
 assert.equal(missingTargetRequirements.ok, false);
 assert.match(missingTargetRequirements.reason, /targetRequirements/);
 
+const whitespaceCorruptedHex = normalizeWarrantyRequest({
+  targetServiceId: rateCard,
+  timeoutMs: 600000,
+  targetRequirements: {
+    targetAddress: "0x42000000000000000000000000000000 00000006",
+  },
+}, { allowedTargetServiceIds: rateCard });
+assert.equal(whitespaceCorruptedHex.ok, false);
+assert.match(whitespaceCorruptedHex.reason, /targetAddress.*contains whitespace/);
+
+const nestedWhitespaceCorruptedHex = normalizeWarrantyRequest({
+  targetServiceId: rateCard,
+  timeoutMs: 600000,
+  targetRequirements: {
+    transaction: {
+      data: "0x095ea7b3 ffffffff",
+    },
+  },
+}, { allowedTargetServiceIds: rateCard });
+assert.equal(nestedWhitespaceCorruptedHex.ok, false);
+assert.match(nestedWhitespaceCorruptedHex.reason, /transaction\.data.*contains whitespace/);
+
 const badTimeout = normalizeWarrantyRequest({
   targetServiceId: rateCard,
   timeoutMs: 10,

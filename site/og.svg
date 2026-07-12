@@ -18,9 +18,9 @@
 
   <g transform="translate(68 550)">
     <rect width="178" height="43" rx="6" fill="#68ef6c"/>
-    <text x="22" y="28" fill="#0b120e" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">8 covered routes</text>
-    <text x="210" y="28" fill="#c8d0ca" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">5 buyer wallets</text>
-    <text x="376" y="28" fill="#c8d0ca" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">5 target agents</text>
+    <text x="22" y="28" fill="#0b120e" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">9 covered routes</text>
+    <text x="210" y="28" fill="#c8d0ca" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">6 buyer wallets</text>
+    <text x="376" y="28" fill="#c8d0ca" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">6 target services</text>
   </g>
 
   <g transform="translate(720 78)">
