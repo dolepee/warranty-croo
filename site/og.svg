@@ -10,11 +10,11 @@
     <text x="76" y="40" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700">Warranty</text>
   </g>
 
-  <text x="68" y="205" fill="#68ef6c" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">CROO CAP / BASE MAINNET</text>
-  <text x="68" y="282" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="800">Agent work</text>
-  <text x="68" y="355" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="800">with a refund</text>
-  <text x="68" y="428" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="800">behind it.</text>
-  <text x="68" y="486" fill="#b9c4bc" font-family="Arial, Helvetica, sans-serif" font-size="23">Delivery returned, or Base USDC refunded.</text>
+  <text x="68" y="205" fill="#68ef6c" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">LIVE DELIVERY DESK / CROO CAP / BASE</text>
+  <text x="68" y="282" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="800">The funded</text>
+  <text x="68" y="351" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="800">delivery desk</text>
+  <text x="68" y="420" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="800">for CROO agents.</text>
+  <text x="68" y="478" fill="#b9c4bc" font-family="Arial, Helvetica, sans-serif" font-size="21">Admit the route. Hire the target. Return work or Base USDC.</text>
 
   <g transform="translate(68 550)">
     <rect width="178" height="43" rx="6" fill="#68ef6c"/>
@@ -25,16 +25,16 @@
 
   <g transform="translate(720 78)">
     <rect width="412" height="510" rx="8" fill="#f9fbf8" stroke="#344139"/>
-    <text x="26" y="38" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">COVERAGE POLICY</text>
+    <text x="26" y="38" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">COVERAGE ADMISSION</text>
     <text x="26" y="68" fill="#0b120e" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700">guaranteed_delivery</text>
     <rect x="328" y="24" width="58" height="30" rx="5" fill="#dff7e2"/>
     <text x="340" y="44" fill="#12612b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">OPEN</text>
 
     <line x1="0" y1="92" x2="412" y2="92" stroke="#d5dad3"/>
-    <text x="26" y="128" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="15">Warranty service fee</text>
-    <text x="386" y="128" fill="#0b120e" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="end">0.08 USDC</text>
+    <text x="26" y="128" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="15">Payment asset</text>
+    <text x="386" y="128" fill="#0b120e" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="end">Base USDC</text>
     <line x1="0" y1="150" x2="412" y2="150" stroke="#d5dad3"/>
-    <text x="26" y="186" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="15">Supported target fee</text>
+    <text x="26" y="186" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="15">Target payment</text>
     <text x="386" y="186" fill="#0b120e" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="end">up to 0.10 USDC</text>
     <line x1="0" y1="208" x2="412" y2="208" stroke="#d5dad3"/>
     <text x="26" y="244" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="15">Coverage ceiling</text>
@@ -46,21 +46,21 @@
 
     <g transform="translate(26 352)">
       <rect width="92" height="46" rx="5" fill="#ffffff" stroke="#d5dad3"/>
-      <text x="46" y="29" fill="#26312a" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Buyer</text>
+    <text x="46" y="29" fill="#26312a" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Check</text>
       <text x="132" y="29" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="16">&gt;</text>
       <rect x="154" width="102" height="46" rx="5" fill="#dff7e2" stroke="#12612b"/>
-      <text x="205" y="29" fill="#12612b" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Warranty</text>
+      <text x="205" y="29" fill="#12612b" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Route</text>
       <text x="270" y="29" fill="#5d6a62" font-family="Arial, Helvetica, sans-serif" font-size="16">&gt;</text>
       <rect x="292" width="92" height="46" rx="5" fill="#ffffff" stroke="#d5dad3"/>
-      <text x="338" y="29" fill="#26312a" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Target</text>
+      <text x="338" y="29" fill="#26312a" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="middle">Settle</text>
     </g>
 
     <rect x="26" y="430" width="8" height="8" rx="2" fill="#12612b"/>
-    <text x="46" y="440" fill="#26312a" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Delivery returned</text>
+    <text x="46" y="440" fill="#26312a" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">6 checks passed</text>
     <rect x="214" y="430" width="8" height="8" rx="2" fill="#f2c257"/>
-    <text x="234" y="440" fill="#26312a" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Or buyer refunded</text>
+    <text x="234" y="440" fill="#26312a" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Admitted / fulfilled</text>
 
     <rect x="0" y="480" width="412" height="30" fill="#68ef6c"/>
-    <text x="206" y="500" fill="#0b120e" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="middle">PUBLIC RECEIPTS / PUBLIC RESERVE / PUBLIC CODE</text>
+    <text x="206" y="500" fill="#0b120e" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="middle">POLICY HASH / JOURNAL RECEIPT / BASE TRANSACTIONS</text>
   </g>
 </svg>

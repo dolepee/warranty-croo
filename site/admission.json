@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-13T14:53:55.688Z",
+  "desk": {
+    "status": "open",
+    "mode": "real_refund",
+    "serviceId": "ab65f96b-7f94-4299-8646-7f8f7b96c432",
+    "policy": {
+      "baseUsdc": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "allowlistedTargetCount": 23,
+      "coverageCapAtomic": "500000",
+      "coverageCapUSDC": "0.5",
+      "maxTargetPriceAtomic": "100000",
+      "maxTargetPriceUSDC": "0.1",
+      "deadlineBoundsMs": [
+        600000,
+        3600000
+      ],
+      "buyerRateLimit": {
+        "maxOrders": 1,
+        "windowSeconds": 86400
+      }
+    },
+    "policyDigest": "sha256:7e3172a5d4d607af21b4d1c134afa18a54fb6987405a05726f5165f2adc72a54",
+    "reserve": {
+      "wallet": "0x7d287D5f5C40073aEF8bB92A485fC82e446EE7b9",
+      "balanceAtomic": "921845",
+      "balanceUSDC": "0.921845",
+      "activeLiabilityAtomic": "0",
+      "activeLiabilityUSDC": "0",
+      "availableCapacityAtomic": "921845",
+      "availableCapacityUSDC": "0.921845",
+      "capacityAfterMaxOrderAtomic": "421845",
+      "capacityAfterMaxOrderUSDC": "0.421845",
+      "activeOrderCount": 0,
+      "canCoverNextMaxOrder": true
+    }
+  },
+  "latestAdmission": {
+    "receiptId": "admission-ae78663d-8440-4e48-88cf-70c8750e1cee",
+    "decision": "admitted",
+    "source": "Warranty journal plus read-only CROO order reconciliation",
+    "admittedAt": "2026-07-11T17:17:24.357Z",
+    "completedAt": "2026-07-11T17:20:56.504Z",
+    "incomingOrderId": "ae78663d-8440-4e48-88cf-70c8750e1cee",
+    "buyerWallet": "0xB402DC99AD786F4778C72E08EA0fD610EC4c5339",
+    "targetAgent": "RateCard",
+    "targetServiceId": "e97e8c6d-9eda-4f20-b76d-2af57ace608d",
+    "requestedDeadlineMs": 600000,
+    "coverageAmountAtomic": "80000",
+    "coverageAmountUSDC": "0.08",
+    "checks": [
+      {
+        "id": "request",
+        "label": "Structured target request",
+        "result": "pass",
+        "detail": "Normalized JSON request"
+      },
+      {
+        "id": "target",
+        "label": "Supported target",
+        "result": "pass",
+        "detail": "RateCard"
+      },
+      {
+        "id": "asset",
+        "label": "Base USDC payment",
+        "result": "pass",
+        "detail": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+      },
+      {
+        "id": "coverage",
+        "label": "Coverage within ceiling",
+        "result": "pass",
+        "detail": "0.08 of 0.5 USDC"
+      },
+      {
+        "id": "deadline",
+        "label": "Deadline inside policy",
+        "result": "pass",
+        "detail": "10 minutes"
+      },
+      {
+        "id": "targetPayment",
+        "label": "Target payment within limit",
+        "result": "pass",
+        "detail": "0.1 of 0.1 USDC"
+      }
+    ],
+    "outcome": {
+      "stage": "FULFILLED",
+      "targetOrderId": "e1c51262-9858-46df-ab56-034b70290bbd",
+      "targetStatus": "completed",
+      "targetOnTime": true,
+      "targetPayTxHash": "0xe74aab6ed1c8497668ea8ace3aa33bb84a2de45c1abe6906df85f6eb90f202ab",
+      "finalTxHash": "0xd709c1887f5e6f1c3fd508f46d97d1abe690abee865e61c0d48fa995caadadff"
+    }
+  },
+  "snapshotDigest": "sha256:a2bdfb2676a6fbbc1666d04c59da1117dfeaf57ecdf0d38a1af05c3ae74e7b8e"
+}

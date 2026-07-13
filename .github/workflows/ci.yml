@@ -39,6 +39,9 @@ jobs:
       - name: Verify proof ledger
         run: npm run coverage:check
 
+      - name: Verify admission receipt
+        run: npm run admission:check
+
       - name: Scan public surface
         run: npm run public:check
 

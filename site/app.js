@@ -1,4 +1,5 @@
 const PROOF_URL = "./proofs.json";
+const ADMISSION_URL = "./admission.json";
 const BASESCAN_TX = "https://basescan.org/tx/";
 const BASESCAN_ADDRESS = "https://basescan.org/address/";
 const BASE_RPC = "https://mainnet.base.org";
@@ -12,6 +13,7 @@ const ledgerState = {
 initializeCopyButtons();
 initializeLedgerFilters();
 loadProofs();
+loadAdmission();
 
 async function loadProofs() {
   try {
@@ -29,6 +31,152 @@ async function loadProofs() {
     showDataError("covered-services-body", 4, "Covered services are temporarily unavailable. Open the full ledger instead.");
     console.warn(error);
   }
+}
+
+async function loadAdmission() {
+  try {
+    const response = await fetch(ADMISSION_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error(`admission request failed with ${response.status}`);
+    renderAdmission(await response.json());
+  } catch (error) {
+    showAdmissionError();
+    console.warn(error);
+  }
+}
+
+function renderAdmission(admission) {
+  const desk = admission.desk || {};
+  const reserve = desk.reserve || {};
+  const policy = desk.policy || {};
+  const receipt = admission.latestAdmission || {};
+  const status = String(desk.status || "unavailable").toLowerCase();
+
+  setText("[data-admission-status]", status === "open" ? "Open" : "Closed");
+  document.querySelectorAll("[data-admission-status]").forEach((element) => {
+    element.classList.toggle("is-open", status === "open");
+  });
+  setText("[data-admission-balance]", `${reserve.availableCapacityUSDC || "0"} USDC`);
+  setText("[data-admission-generated]", formatSnapshotTime(admission.generatedAt));
+  setText("[data-admission-liability]", `${reserve.activeLiabilityUSDC || "0"} USDC`);
+  setText("[data-admission-cap]", `${policy.coverageCapUSDC || "0"} USDC`);
+  setText("[data-admission-after]", `${reserve.capacityAfterMaxOrderUSDC || "0"} USDC`);
+  setText("[data-admission-targets]", String(policy.allowlistedTargetCount ?? "Unavailable"));
+  const buyerLimit = policy.buyerRateLimit || {};
+  setText(
+    "[data-admission-buyer-limit]",
+    buyerLimit.maxOrders && buyerLimit.windowSeconds
+      ? `${buyerLimit.maxOrders} / ${buyerLimit.windowSeconds / 3600}h`
+      : "Unavailable",
+  );
+  setText(
+    "[data-admission-verdict]",
+    reserve.canCoverNextMaxOrder
+      ? `OPEN: the reserve can cover active liabilities plus the maximum ${policy.coverageCapUSDC} USDC policy liability.`
+      : "CLOSED: the current reserve cannot cover another maximum policy liability.",
+  );
+
+  const decision = String(receipt.decision || "unavailable").toLowerCase();
+  setText("[data-admission-decision]", titleCase(decision));
+  document.querySelectorAll("[data-admission-decision]").forEach((element) => {
+    element.classList.toggle("is-admitted", decision === "admitted");
+  });
+  setText(
+    "[data-admission-outcome]",
+    `${decision.toUpperCase()} -> ${String(receipt.outcome?.stage || "unknown").toUpperCase()}`,
+  );
+  setText("[data-admission-digest]", shortDigest(admission.snapshotDigest));
+  setTransactionHref("[data-admission-target-tx]", receipt.outcome?.targetPayTxHash);
+  setTransactionHref("[data-admission-final-tx]", receipt.outcome?.finalTxHash);
+
+  const list = document.getElementById("admission-checks");
+  if (!list) return;
+  list.replaceChildren();
+  const checks = Array.isArray(receipt.checks) ? receipt.checks : [];
+  if (!checks.length) {
+    const item = document.createElement("li");
+    item.className = "admission-check-loading";
+    item.textContent = "No admission checks are available.";
+    list.append(item);
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  checks.forEach((check) => fragment.append(createAdmissionCheck(check)));
+  list.append(fragment);
+}
+
+function createAdmissionCheck(check) {
+  const item = document.createElement("li");
+  item.className = `admission-check is-${check.result === "pass" ? "pass" : "fail"}`;
+  const result = document.createElement("span");
+  result.className = "admission-check-result";
+  result.textContent = check.result === "pass" ? "PASS" : "FAIL";
+  const copy = document.createElement("div");
+  const label = document.createElement("strong");
+  label.textContent = check.label || "Policy check";
+  const detail = document.createElement("small");
+  detail.textContent = check.detail || "No detail provided";
+  copy.append(label, detail);
+  item.append(result, copy);
+  return item;
+}
+
+function showAdmissionError() {
+  setText("[data-admission-status]", "Unavailable");
+  setText("[data-admission-balance]", "Unavailable");
+  setText("[data-admission-generated]", "Snapshot unavailable");
+  setText("[data-admission-liability]", "Unavailable");
+  setText("[data-admission-cap]", "Unavailable");
+  setText("[data-admission-after]", "Unavailable");
+  setText("[data-admission-targets]", "Unavailable");
+  setText("[data-admission-buyer-limit]", "Unavailable");
+  setText("[data-admission-verdict]", "Admission snapshot unavailable. Open admission JSON for the raw artifact.");
+  setText("[data-admission-decision]", "Unavailable");
+  setText("[data-admission-outcome]", "Unavailable");
+  setText("[data-admission-digest]", "Unavailable");
+  const list = document.getElementById("admission-checks");
+  if (list) {
+    list.replaceChildren();
+    const item = document.createElement("li");
+    item.className = "admission-check-loading";
+    item.textContent = "Admission receipt unavailable. Open admission JSON instead.";
+    list.append(item);
+  }
+}
+
+function setText(selector, value) {
+  document.querySelectorAll(selector).forEach((element) => {
+    element.textContent = value;
+  });
+}
+
+function setTransactionHref(selector, hash) {
+  document.querySelectorAll(selector).forEach((element) => {
+    if (/^0x[a-fA-F0-9]{64}$/.test(hash || "")) element.href = `${BASESCAN_TX}${hash}`;
+  });
+}
+
+function shortDigest(value) {
+  const text = String(value || "");
+  if (text.length <= 24) return text || "Unavailable";
+  return `${text.slice(0, 15)}...${text.slice(-8)}`;
+}
+
+function titleCase(value) {
+  const text = String(value || "");
+  return text ? `${text[0].toUpperCase()}${text.slice(1)}` : "Unavailable";
+}
+
+function formatSnapshotTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Snapshot time unavailable";
+  return `Snapshot ${new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
+  }).format(date)}`;
 }
 
 function updateMetrics(summary) {

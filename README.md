@@ -1,16 +1,22 @@
 # Warranty
 
-Warranty is the money-back guarantee for CROO agent work. Hire a supported CROO service through Warranty. If the target service misses the buyer's deadline, Warranty refunds the buyer from a bonded Base USDC reserve, on chain.
+**Warranty is the funded delivery desk for CROO agent work.** It admits only coverable routes, autonomously hires the requested supported agent through CAP, and returns either the work or Base USDC.
 
-CROO gives agents identity, payments, discovery, and liquidity. Agent commerce also needs assurance. Buyers need a way to pay agents without accepting unlimited delivery risk, and agents need a reusable path for buying work from other agents without writing custom failure handling every time. Reputation tools predict, claims processes argue; Warranty just repays, automatically, when the deadline passes.
+CROO gives agents identity, payments, discovery, and liquidity. Warranty adds a standing buyer-side role: check whether a route fits policy before target funds move, execute the A2A hire-pay-observe lifecycle, and put a funded consequence behind a missed covered deadline. Reputation tools predict and claims processes argue; Warranty admits, routes, and settles.
 
 Warranty receives a paid CROO order, hires the requested target agent through CAP, pays that target agent, watches the delivery state, and either returns the target result, refunds the buyer from reserve, or uses CROO's native reject path when a target refuses or fails before delivery.
 
 **Use Warranty:** [CROO agent listing](https://agent.croo.network/agents/8bf1ef7b-dee8-48a3-a155-76c6bb8fd424) · service `guaranteed_delivery` · ID `ab65f96b-7f94-4299-8646-7f8f7b96c432`
 
-**Verify it:** [live product](https://warranty-croo.vercel.app) · [proof JSON](https://warranty-croo.vercel.app/proofs.json) · [`data/coverage-ledger.json`](data/coverage-ledger.json)
+**Verify it:** [live product](https://warranty-croo.vercel.app) · [admission receipt](https://warranty-croo.vercel.app/admission.json) · [proof JSON](https://warranty-croo.vercel.app/proofs.json) · [`data/coverage-ledger.json`](data/coverage-ledger.json)
 
 ![Warranty product preview](site/og.png)
+
+## Coverage Admission Receipt
+
+The public [admission receipt](site/admission.json) makes the proactive gate visible. It combines the current fail-closed policy, live reserve capacity, active journal liabilities, and the newest journaled route that still passes the current policy. The route receipt exposes six checks without publishing the target's private task payload: structured request, supported target, Base USDC, coverage ceiling, deadline window, and actual target payment.
+
+`npm run admission:export` is read-only with respect to CROO and Base. It reads the durable Warranty journal, reconciles the referenced CROO orders, reads the reserve balance, and writes a sanitized static snapshot with SHA-256 policy and snapshot digests. It does not accept a negotiation, place or pay an order, deliver a result, or send a refund. CI runs `npm run admission:check` to verify the digest and cross-check the receipt against the public proof ledger.
 
 ## Honest Scope
 
@@ -21,8 +27,8 @@ Warranty is not protocol-native escrow and it is not an insurance product. The r
 ## How It Works
 
 1. A buyer pays Warranty through CROO CAP for `guaranteed_delivery`.
-2. The buyer specifies a supported target CROO service and task requirements.
-3. Warranty places and pays a second CAP order to the target agent.
+2. Warranty admits the route only when the request, target, Base USDC asset, coverage, deadline, buyer limit, and reserve capacity fit policy.
+3. Warranty places and pays a second CAP order to the target agent after the remaining target-payment check passes.
 4. Warranty monitors delivery state through CAP order and delivery reads.
 5. If the target delivers before timeout, Warranty forwards the result to the buyer.
 6. If delivery is missing after timeout, Warranty delivers a refund receipt and sends Base USDC from its bonded reserve to the buyer, or rejects through CROO when the platform can return the escrowed payment natively.
@@ -184,9 +190,9 @@ A sixth independent external wallet paid Warranty during a CrooCred audit of an 
 | External audit payment tx | `0x2772338c83673126d617a8c5a85228472f7919ea2bcc49987bdc82c9359b04a7` |
 | Counted as successful fulfillment | `No` |
 
-## Active Coverage Campaign
+## Funded Delivery Desk Activity
 
-Warranty is now structured as an active guarantee router, not only a spike. Each covered order is logged as:
+Warranty is an active funded delivery desk, not only a spike. Each covered order is logged as:
 
 1. Buyer pays Warranty through CROO.
 2. Warranty pays the target CROO service.

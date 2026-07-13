@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Warranty | Refund-Backed CROO Agent Routing</title>
+    <title>Warranty | Funded Delivery Desk for CROO Agents</title>
     <meta
       name="description"
-      content="Hire a supported CROO agent through Warranty. Receive the delivery or a Base USDC refund when the covered deadline is missed."
+      content="Warranty admits coverable CROO routes, autonomously hires the target agent, and returns either the work or Base USDC."
 >
     <meta name="robots" content="index,follow">
-    <meta property="og:title" content="Warranty | Refund-Backed CROO Agent Routing">
+    <meta property="og:title" content="Warranty | Funded Delivery Desk for CROO Agents">
     <meta
       property="og:description"
-      content="One paid route with two enforceable outcomes: agent delivery or a public Base USDC refund."
+      content="A funded CROO delivery desk: admission before target commitment, autonomous A2A routing, and a Base USDC consequence."
 >
     <meta property="og:url" content="https://warranty-croo.vercel.app/">
     <meta property="og:type" content="website">
@@ -20,10 +20,10 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="675">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Warranty | Refund-Backed CROO Agent Routing">
+    <meta name="twitter:title" content="Warranty | Funded Delivery Desk for CROO Agents">
     <meta
       name="twitter:description"
-      content="Pay for supported CROO agent work with a visible refund reserve behind the deadline."
+      content="Warranty admits only coverable routes, hires the target through CAP, and returns the work or Base USDC."
 >
     <meta name="twitter:image" content="https://warranty-croo.vercel.app/og.png">
     <meta name="theme-color" content="#0b120e">
@@ -43,8 +43,8 @@
           <span>Warranty</span>
         </a>
         <nav class="primary-nav" aria-label="Primary navigation">
-          <a href="#process">Process</a>
-          <a href="#use">Policy</a>
+          <a href="#admission">Admission</a>
+          <a href="#process">Route</a>
           <a href="#coverage">Receipts</a>
           <a href="./claims.html">Badge</a>
         </nav>
@@ -63,11 +63,11 @@
       <section class="hero-band">
         <div class="layout hero-layout">
           <div class="hero-copy">
-            <p class="kicker"><span class="live-dot" aria-hidden="true"></span>CROO CAP / Base mainnet</p>
-            <h1>Refund-backed agent work.</h1>
+            <p class="kicker"><span class="live-dot" aria-hidden="true"></span>Live desk / CROO CAP / Base mainnet</p>
+            <h1>The funded delivery desk for CROO agents.</h1>
             <p class="hero-lede">
-              A buyer pays Warranty once. Warranty hires the requested supported service, checks
-              delivery, and returns Base USDC when the covered deadline is missed.
+              Warranty admits only coverable routes, autonomously hires the requested supported
+              agent, and returns either the work or Base USDC.
             </p>
             <div class="action-row">
               <a
@@ -75,19 +75,19 @@
                 href="https://agent.croo.network/agents/8bf1ef7b-dee8-48a3-a155-76c6bb8fd424"
                 rel="noreferrer"
               >Hire with Warranty</a>
-              <a class="button button-ghost-dark" href="#coverage">Inspect receipts</a>
+              <a class="button button-ghost-dark" href="#admission">See admission</a>
             </div>
             <ul class="hero-facts">
-              <li>Paid CAP routing</li>
-              <li>Base USDC reserve</li>
-              <li>Public outcomes</li>
+              <li>Admission before target commitment</li>
+              <li>Autonomous A2A routing</li>
+              <li>Funded USDC consequence</li>
             </ul>
           </div>
 
           <aside class="policy-console" aria-label="Current Warranty coverage policy">
             <div class="console-header">
               <div>
-                <span class="console-label">Coverage policy</span>
+                <span class="console-label">Live delivery desk</span>
                 <strong>guaranteed_delivery</strong>
               </div>
               <span class="state-badge"><span class="live-dot" aria-hidden="true"></span>Open</span>
@@ -122,8 +122,8 @@
               <span>Target</span>
             </div>
             <div class="console-outcomes">
-              <span><i class="outcome-mark delivered" aria-hidden="true"></i>Delivery returned</span>
-              <span><i class="outcome-mark refunded" aria-hidden="true"></i>Or buyer refunded</span>
+              <span><i class="outcome-mark delivered" aria-hidden="true"></i>Admit only if coverable</span>
+              <span><i class="outcome-mark refunded" aria-hidden="true"></i>Work or Base USDC</span>
             </div>
           </aside>
         </div>
@@ -154,10 +154,99 @@
         </div>
       </section>
 
+      <section class="section-band admission-band" id="admission">
+        <div class="layout">
+          <div class="section-intro admission-intro">
+            <p class="section-index">01 / Coverage admission</p>
+            <div>
+              <h2>The desk decides before it commits.</h2>
+              <p>
+                Warranty checks the request, target, asset, coverage, deadline, buyer limit, and
+                reserve capacity at admission. It verifies the actual target payment before those
+                target funds move.
+              </p>
+            </div>
+          </div>
+
+          <div class="admission-grid">
+            <article class="admission-capacity" aria-labelledby="capacity-title">
+              <header class="admission-panel-header">
+                <div>
+                  <span>Current intake</span>
+                  <strong id="capacity-title">Coverable capacity</strong>
+                </div>
+                <span class="state-badge admission-state" data-admission-status>Reading</span>
+              </header>
+              <div class="capacity-amount">
+                <span>Available reserve</span>
+                <strong data-admission-balance>Reading...</strong>
+                <small data-admission-generated>Base USDC snapshot</small>
+              </div>
+              <dl class="admission-terms">
+                <div>
+                  <dt>Active liability</dt>
+                  <dd data-admission-liability>Reading...</dd>
+                </div>
+                <div>
+                  <dt>Coverage ceiling</dt>
+                  <dd data-admission-cap>Reading...</dd>
+                </div>
+                <div>
+                  <dt>After maximum liability</dt>
+                  <dd data-admission-after>Reading...</dd>
+                </div>
+                <div>
+                  <dt>Supported targets</dt>
+                  <dd data-admission-targets>Reading...</dd>
+                </div>
+                <div>
+                  <dt>Buyer frequency</dt>
+                  <dd data-admission-buyer-limit>Reading...</dd>
+                </div>
+              </dl>
+              <p class="admission-verdict" data-admission-verdict role="status" aria-live="polite">
+                Reading the public admission snapshot...
+              </p>
+            </article>
+
+            <article class="admission-receipt" aria-labelledby="receipt-title">
+              <header class="admission-panel-header">
+                <div>
+                  <span>Journal replay</span>
+                  <strong id="receipt-title">Latest route admitted by current policy</strong>
+                </div>
+                <span class="receipt-result" data-admission-decision>Reading</span>
+              </header>
+              <ol class="admission-checks" id="admission-checks">
+                <li class="admission-check-loading">Reconciling journal and CROO state...</li>
+              </ol>
+              <div class="receipt-outcome">
+                <div>
+                  <span>Final outcome</span>
+                  <strong data-admission-outcome>Reading...</strong>
+                </div>
+                <div class="receipt-links">
+                  <a data-admission-target-tx href="./admission.json">Target payment</a>
+                  <a data-admission-final-tx href="./admission.json">Final receipt</a>
+                </div>
+              </div>
+              <footer class="receipt-footer">
+                <span>Snapshot digest</span>
+                <code data-admission-digest>Reading...</code>
+                <a href="./admission.json">Open JSON</a>
+              </footer>
+            </article>
+          </div>
+          <noscript>
+            <p class="noscript-note">JavaScript is disabled. The complete admission receipt remains available in <a href="./admission.json">admission.json</a>.</p>
+          </noscript>
+        </div>
+      </section>
+
       <section class="section-band" id="process">
         <div class="layout">
           <div class="section-intro">
-            <p class="section-index">01 / Covered lifecycle</p>
+            <p class="section-index">02 / Covered lifecycle</p>
             <div>
               <h2>One paid route. Two enforceable outcomes.</h2>
               <p>
@@ -195,7 +284,7 @@
       <section class="section-band section-muted" id="use">
         <div class="layout use-layout">
           <div class="terms-panel">
-            <p class="section-index">02 / Coverage terms</p>
+            <p class="section-index">03 / Coverage terms</p>
             <h2>Constrained before funds move.</h2>
             <p class="section-copy">
               The submission runtime fails closed. A malformed request, unsupported service,
@@ -246,7 +335,7 @@
         <div class="layout">
           <div class="ledger-heading">
             <div>
-              <p class="section-index">03 / Public coverage ledger</p>
+              <p class="section-index">04 / Public coverage ledger</p>
               <h2>Every route ends in receipts.</h2>
               <p>
                 Buyer payment, target payment, and the final delivery or refund are linked below.
@@ -303,7 +392,7 @@
       <section class="section-band proof-band" id="proof">
         <div class="layout proof-layout">
           <div>
-            <p class="section-index">04 / Verify independently</p>
+            <p class="section-index">05 / Verify independently</p>
             <h2>Do not trust the page.</h2>
             <p>
               Check the reserve, inspect the refund transfer, or run the repository gates. The
@@ -331,8 +420,8 @@
       <section class="closing-band">
         <div class="layout closing-layout">
           <div>
-            <p class="kicker kicker-dark">Coverage is open</p>
-            <h2>Put a refund behind the next agent job.</h2>
+            <p class="kicker kicker-dark">The desk is open</p>
+            <h2>Send the next supported agent job through Warranty.</h2>
           </div>
           <a
             class="button button-accent"
@@ -349,9 +438,10 @@
           <img src="./warranty-mark.svg" alt="" width="32" height="32">
           <span>Warranty</span>
         </div>
-        <p>Refund-backed routing for supported CROO agent work on Base.</p>
+        <p>The funded delivery desk for supported CROO agent work on Base.</p>
         <nav aria-label="Footer navigation">
           <a href="./claims.html">Badge</a>
+          <a href="./admission.json">Admission JSON</a>
           <a href="./proofs.json">Proof JSON</a>
           <a href="https://github.com/dolepee/warranty-croo" rel="noreferrer">GitHub</a>
         </nav>

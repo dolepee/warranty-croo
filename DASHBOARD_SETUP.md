@@ -11,7 +11,7 @@ Agent name:
 
 Short description:
 
-`Refund-backed routing for supported CROO services. Warranty hires the target agent, forwards valid delivery, or refunds from a visible Base USDC reserve if the target misses the deadline.`
+`The funded delivery desk for CROO agents. Warranty admits coverable routes, hires the target through CAP, and returns either the work or Base USDC.`
 
 Service name:
 
@@ -19,11 +19,11 @@ Service name:
 
 Service description:
 
-`Warranty is a refund-backed router for supported CROO services. Paste the JSON request below. Warranty hires the requested allowlisted target, pays it through CAP, forwards a valid delivery, or refunds from the visible Base USDC reserve if the target misses the deadline. Unsupported targets, malformed JSON, missing targetRequirements, or targets above the configured price cap are rejected before Warranty accepts the job.`
+`Warranty is the funded delivery desk for supported CROO services. Before committing target funds it checks the JSON request, target allowlist, Base USDC asset, coverage ceiling, deadline, buyer limit, and reserve capacity. After admission, Warranty hires and pays the target through CAP, then returns either the target work or a Base USDC refund when the covered deadline is missed. Unsupported targets, malformed JSON, unsafe deadlines, and excessive prices fail closed before target funds move.`
 
 Suggested price:
 
-`0.10 USDC`
+`0.08 USDC`
 
 Suggested delivery window:
 
@@ -33,7 +33,7 @@ Input requirements:
 
 ```text
 Paste exactly this JSON for the controlled RateCard route:
-{"targetServiceId":"e97e8c6d-9eda-4f20-b76d-2af57ace608d","timeoutMs":600000,"targetRequirements":{"service_description":"Warranty, a refund-backed CROO route for supported agent services","current_price_usdc":0.08}}
+{"targetServiceId":"e97e8c6d-9eda-4f20-b76d-2af57ace608d","timeoutMs":600000,"targetRequirements":{"service_description":"Warranty, the funded delivery desk for supported CROO agent work","current_price_usdc":0.08}}
 
 Supported format:
 {"targetServiceId":"<allowlisted CROO service id>","timeoutMs":600000,"targetRequirements":{"task":"target-specific JSON input"}}
@@ -60,11 +60,11 @@ Output shape:
 
 Important claim:
 
-`CAP handles the paid order lifecycle and delivery state. Warranty adds an external bonded reserve that refunds failed jobs on chain when CAP order state shows expiry or non delivery.`
+`Warranty admits only coverable routes, executes the A2A hire-pay-observe lifecycle through CROO CAP, and adds an external bonded reserve that refunds a missed covered deadline on chain.`
 
 Do not claim:
 
-`Warranty is protocol-native escrow, insurance, or unlimited coverage. Coverage is capped at 0.5 USDC per order and never promised beyond the live reserve balance.`
+`Do not describe Warranty as protocol-native escrow, insurance, an underwriter, a quality guarantee, or unlimited coverage. Coverage is capped at 0.5 USDC per order and never promised beyond the live reserve balance.`
 
 ## 2. Buyer Agent
 
